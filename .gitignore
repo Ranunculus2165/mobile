@@ -1,0 +1,25 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Python
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+dist/
+build/
+
+# Gradle
+.gradle/
+build/
+
+# Docker
+data/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
