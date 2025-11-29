@@ -51,8 +51,8 @@ class StoreListAdapter(
                 else -> "상태 알 수 없음"
             }
 
-            val minOrderText = String.format("최소주문 %,d원", item.minOrderAmount)
-            tvMinOrderAndTime.text = "$minOrderText · ${item.estimatedDeliveryTime}"
+            val minOrderText = String.format("최소주문 %,d원", item.minOrderPrice)
+            tvMinOrderAndTime.text = "약 30~40분"
 
             itemView.setOnClickListener {
                 onStoreClick(item)

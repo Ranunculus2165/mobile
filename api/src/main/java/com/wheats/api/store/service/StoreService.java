@@ -1,8 +1,9 @@
 package com.wheats.api.store.service;
 
-import com.wheats.api.store.dto.Store;
-import com.wheats.api.store.dto.StoreStatus;
+import com.wheats.api.store.dto.*;
+import com.wheats.api.store.entity.MenuEntity;
 import com.wheats.api.store.entity.StoreEntity;
+import com.wheats.api.store.repository.MenuRepository;
 import com.wheats.api.store.repository.StoreRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,12 +15,14 @@ import java.util.Optional;
 public class StoreService {
 
     private final StoreRepository storeRepository;
+    private final MenuRepository menuRepository;
 
-    public StoreService(StoreRepository storeRepository) {
+    public StoreService(StoreRepository storeRepository, MenuRepository menuRepository) {
         this.storeRepository = storeRepository;
+        this.menuRepository = menuRepository;
     }
 
-    /** 전체 목록 */
+    /** 전체 목록 (리스트 화면) */
     public List<Store> getAllStores() {
         List<Store> result = new ArrayList<>();
         for (StoreEntity entity : storeRepository.findAll()) {
@@ -28,13 +31,17 @@ public class StoreService {
         return result;
     }
 
-    /** 단일 가게 조회 */
-    public Optional<Store> getStore(Long id) {
+    /** 단일 가게 + 메뉴 목록 (상세 화면) */
+    public Optional<StoreDetailResponse> getStoreDetail(Long id) {
         return storeRepository.findById(id)
-                .map(this::toStoreDto);
+                .map(entity -> {
+                    Store storeDto = toStoreDto(entity);
+                    List<MenuItem> menuDtos = toMenuDtoList(menuRepository.findByStore_Id(id));
+                    return new StoreDetailResponse(storeDto, menuDtos);
+                });
     }
 
-    /** Entity → DTO 변환 */
+    /** Entity → Store DTO */
     private Store toStoreDto(StoreEntity e) {
         Store dto = new Store();
         dto.setId(e.getId());
@@ -52,5 +59,21 @@ public class StoreService {
                         : StoreStatus.CLOSED
         );
         return dto;
+    }
+
+    /** 메뉴 Entity 리스트 → DTO 리스트 */
+    private List<MenuItem> toMenuDtoList(List<MenuEntity> entities) {
+        List<MenuItem> list = new ArrayList<>();
+        for (MenuEntity e : entities) {
+            MenuItem m = new MenuItem();
+            m.setId(e.getId());
+            m.setName(e.getName());
+            m.setPrice(e.getPrice());
+            m.setDescription(e.getDescription());
+            m.setAvailable(e.getIsAvailable());
+            m.setImageUrl(e.getImageUrl());
+            list.add(m);
+        }
+        return list;
     }
 }

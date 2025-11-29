@@ -1,27 +1,36 @@
--- db/schema.sql
-
--- DB가 없는 경우 생성 (docker-compose에서 MYSQL_DATABASE로도 생성되지만, 안전하게 한 번 더)
+-- DB 생성
 CREATE DATABASE IF NOT EXISTS wheats
   DEFAULT CHARACTER SET utf8mb4
-  DEFAULT COLLATE utf8mb4_unicode_ci;
+  COLLATE utf8mb4_unicode_ci;
 
 USE wheats;
 
--- 기존에 같은 이름의 테이블이 있으면 삭제
-DROP TABLE IF EXISTS stores;
+-- 가게 테이블
+CREATE TABLE IF NOT EXISTS stores (
+                                      id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                      name VARCHAR(100) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    description TEXT,
+    min_order_price INT,
+    delivery_tip INT,
+    rating DOUBLE,
+    review_count INT,
+    is_open TINYINT(1) DEFAULT 1,
+    image_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 가게 정보 테이블
-CREATE TABLE stores (
-                        id              BIGINT AUTO_INCREMENT PRIMARY KEY,   -- 가게 ID
-                        name            VARCHAR(100) NOT NULL,               -- 가게 이름
-                        category        VARCHAR(50),                         -- 한식, 분식, 치킨 등
-                        description     TEXT,                                -- 가게 소개
-                        min_order_price INT NOT NULL,                        -- 최소 주문 금액 (원)
-                        delivery_tip    INT NOT NULL,                        -- 배달팁 (원)
-                        rating          DECIMAL(2,1),                        -- 평점 (예: 4.5)
-                        review_count    INT DEFAULT 0,                       -- 리뷰 개수
-                        is_open         TINYINT(1) DEFAULT 1,                -- 영업 중 여부 (1: 영업, 0: 휴무)
-                        image_url       TEXT,                                -- 썸네일 이미지 경로/URL
-                        created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        updated_at      DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+-- ✅ 메뉴 테이블 추가
+CREATE TABLE IF NOT EXISTS menus (
+                                     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                     store_id BIGINT NOT NULL,
+                                     name VARCHAR(100) NOT NULL,
+    price INT NOT NULL,
+    description TEXT,
+    is_available TINYINT(1) DEFAULT 1,
+    image_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_menus_store
+    FOREIGN KEY (store_id) REFERENCES stores(id)
+    ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

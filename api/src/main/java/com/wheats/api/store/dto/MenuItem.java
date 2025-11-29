@@ -2,23 +2,28 @@ package com.wheats.api.store.dto;
 
 public class MenuItem {
 
+    private Long id;
     private String name;
-    private int price;
+    private Integer price;
     private String description;
+    private Boolean available;
+    private String imageUrl;
 
-    public MenuItem(String name, int price, String description) {
-        this.name = name;
-        this.price = price;
-        this.description = description;
-    }
-
-    public MenuItem() {}
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public String getName() { return name; }
-    public int getPrice() { return price; }
-    public String getDescription() { return description; }
-
     public void setName(String name) { this.name = name; }
-    public void setPrice(int price) { this.price = price; }
+
+    public Integer getPrice() { return price; }
+    public void setPrice(Integer price) { this.price = price; }
+
+    public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public Boolean getAvailable() { return available; }
+    public void setAvailable(Boolean available) { this.available = available; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

@@ -71,8 +71,8 @@ class StoreListActivity : AppCompatActivity() {
             putExtra(StoreDetailActivity.EXTRA_STORE_ID, store.id)
             putExtra(StoreDetailActivity.EXTRA_STORE_NAME, store.name)
             putExtra(StoreDetailActivity.EXTRA_STORE_STATUS, store.status)
-            putExtra(StoreDetailActivity.EXTRA_STORE_MIN_ORDER, store.minOrderAmount)
-            putExtra(StoreDetailActivity.EXTRA_STORE_TIME, store.estimatedDeliveryTime)
+            putExtra(StoreDetailActivity.EXTRA_STORE_MIN_ORDER, store.minOrderPrice)
+            putExtra(StoreDetailActivity.EXTRA_STORE_TIME, "약 30~40분" )
         }
         startActivity(intent)
     }

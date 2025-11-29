@@ -12,14 +12,9 @@ public class StoreDetailResponse {
         this.menus = menus;
     }
 
-    public StoreDetailResponse() {
-    }
+    public Store getStore() { return store; }
+    public void setStore(Store store) { this.store = store; }
 
-    public Store getStore() {
-        return store;
-    }
-
-    public List<MenuItem> getMenus() {
-        return menus;
-    }
+    public List<MenuItem> getMenus() { return menus; }
+    public void setMenus(List<MenuItem> menus) { this.menus = menus; }
 }
