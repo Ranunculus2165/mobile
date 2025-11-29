@@ -65,3 +65,135 @@ INSERT INTO menus (store_id, name, price, description, is_available, image_url) 
     (5, '카페라떼', 5000, '우유 거품이 부드러운 라떼', 1, NULL),
     (5, '수제 스콘', 4000, '매일매일 구워내는 플레인 스콘', 1, NULL),
     (5, '초코 쿠키', 3500, '진한 초코 맛이 나는 쿠키', 1, NULL);
+
+-- =========================
+-- USERS (테스트용 2명)
+-- =========================
+INSERT INTO users (
+  id, name, email, role, point, created_at
+) VALUES
+  (
+    1,
+    '테스트 소비자',
+    'consumer1@wheats.local',
+    'CONSUMER',
+    100000,
+    NOW()
+  ),
+  (
+    2,
+    '테스트 점주',
+    'merchant1@wheats.local',
+    'MERCHANT',
+    100000,
+    NOW()
+  );
+
+-- =========================
+-- CART (user_id = 1, store_id = 1)
+-- =========================
+INSERT INTO carts (
+  id, user_id, store_id, status, created_at, updated_at
+) VALUES (
+  1,
+  1,              -- 테스트 소비자
+  1,              -- 1번 가게: 황금치킨
+  'ACTIVE',       -- 현재 장바구니 ( /api/cart 테스트용 )
+  NOW(),
+  NOW()
+);
+
+-- =========================
+-- CART_ITEMS (장바구니 안에 메뉴 2개)
+-- 1번 가게(황금치킨)의 메뉴는 위에서 자동으로 id 1~4가 됐다고 가정
+--   1: 후라이드 치킨 16000
+--   4: 치즈볼        5000
+-- =========================
+INSERT INTO cart_items (
+  id, cart_id, menu_id, quantity
+) VALUES
+  (
+    1,
+    1,    -- cart_id
+    1,    -- 메뉴 id 1: 후라이드 치킨
+    1
+  ),
+  (
+    2,
+    1,    -- cart_id
+    4,    -- 메뉴 id 4: 치즈볼
+    2
+  );
+
+-- =========================
+-- ORDERS (user_id = 1, store_id = 1, cart_id = 1)
+-- 총액은 메뉴 가격 기준 예시:
+--   주문 1: 후라이드 1(16000) + 치즈볼 2(2*5000) = 26000
+--   주문 2: 후라이드 1(16000) = 16000
+-- =========================
+INSERT INTO orders (
+  id,
+  order_number,
+  user_id,
+  store_id,
+  cart_id,
+  status,
+  total_price,
+  created_at,
+  paid_at,
+  receipt_flag
+) VALUES
+  (
+    1,
+    'ORD-TEST-0001',
+    1,           -- 테스트 소비자
+    1,           -- 황금치킨
+    1,           -- cart_id 1을 사용 (과거 이 장바구니로 주문한 것으로 가정)
+    'PAID',
+    26000,
+    NOW() - INTERVAL 2 DAY,
+    NOW() - INTERVAL 2 DAY,
+    'WHEATS{DUMMY_FLAG_1}'
+  ),
+  (
+    2,
+    'ORD-TEST-0002',
+    1,
+    1,
+    1,
+    'PAID',
+    16000,
+    NOW() - INTERVAL 1 DAY,
+    NOW() - INTERVAL 1 DAY,
+    'WHEATS{DUMMY_FLAG_2}'
+  );
+
+-- =========================
+-- ORDER_ITEMS (각 주문 상세)
+-- =========================
+INSERT INTO order_items (
+  id, order_id, menu_id, quantity, unit_price
+) VALUES
+  -- 주문 1: 후라이드 1 + 치즈볼 2
+  (
+    1,
+    1,      -- ORD-TEST-0001
+    1,      -- 후라이드 치킨
+    1,
+    16000
+  ),
+  (
+    2,
+    1,      -- ORD-TEST-0001
+    4,      -- 치즈볼
+    2,
+    5000
+  ),
+  -- 주문 2: 후라이드 1
+  (
+    3,
+    2,      -- ORD-TEST-0002
+    1,      -- 후라이드 치킨
+    1,
+    16000
+  );
