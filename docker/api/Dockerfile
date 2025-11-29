@@ -9,7 +9,7 @@ WORKDIR /workspace/api
 COPY api/ .
 
 # 📌 여기(/workspace/api)에 build.gradle.kts, settings.gradle.kts, gradlew, src/ 가 있어야 함
-RUN ./gradlew bootJar --no-daemon
+RUN chmod +x ./gradlew && ./gradlew bootJar --no-daemon
 
 # 2단계: 경량 JRE 이미지로 실행
 FROM eclipse-temurin:17-jre-alpine
