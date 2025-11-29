@@ -1,0 +1,12 @@
+services:
+  api:
+    build:
+      # 📌 빌드 컨텍스트 = WH_EATS 루트
+      context: .
+      # 📌 사용할 Dockerfile 위치
+      dockerfile: docker/api/Dockerfile
+    container_name: wh-eats-api
+    ports:
+      - "8080:8080"     # localhost:8080 → 컨테이너 8080
+    environment:
+      - SPRING_PROFILES_ACTIVE=default

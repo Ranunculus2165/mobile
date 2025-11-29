@@ -1,19 +1,24 @@
-# 예시: Gradle로 빌드된 Spring Boot jar 기준
-FROM eclipse-temurin:17-jdk AS build
+# 1단계: Gradle + JDK17 이미지로 빌드
+FROM gradle:8.7-jdk17 AS builder
+
+# 📌 컨테이너 안에서의 작업 디렉터리
+WORKDIR /workspace/api
+
+# 📌 빌드 컨텍스트(.) 기준으로 api 폴더 전체를 복사
+#    (즉, 호스트의 WH_EATS/api -> 컨테이너 /workspace/api)
+COPY api/ .
+
+# 📌 여기(/workspace/api)에 build.gradle.kts, settings.gradle.kts, gradlew, src/ 가 있어야 함
+RUN ./gradlew bootJar --no-daemon
+
+# 2단계: 경량 JRE 이미지로 실행
+FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-# 필요 시 Gradle이나 빌드 툴 설치 과정 추가
-COPY . .
+# 위에서 빌드된 JAR 복사
+COPY --from=builder /workspace/api/build/libs/*.jar app.jar
 
-# 여기서는 실제 빌드 명령은 나중에 채울 것
-# RUN ./gradlew bootJar
+EXPOSE 8080
 
-FROM eclipse-temurin:17-jre
-
-WORKDIR /app
-# 빌드 결과물 복사 (실제 jar 이름에 맞게 수정 예정)
-# COPY --from=build /app/build/libs/api.jar app.jar
-
-EXPOSE 9000
-CMD ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
