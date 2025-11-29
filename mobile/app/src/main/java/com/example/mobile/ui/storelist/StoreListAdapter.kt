@@ -39,14 +39,15 @@ class StoreListAdapter(
 
         private val tvName: TextView = itemView.findViewById(R.id.tvStoreName)
         private val tvStatus: TextView = itemView.findViewById(R.id.tvStoreStatus)
-        private val tvMinOrderAndTime: TextView = itemView.findViewById(R.id.tvMinOrderAndTime)
+        private val tvMinOrderAndTime: TextView = itemView.findViewById(R.id.tvStoreMinOrder)
 
         fun bind(item: Store) {
             tvName.text = item.name
 
             tvStatus.text = when (item.status) {
-                "OPEN" -> "영업중"
-                "CLOSED" -> "준비중"
+                "OPEN" -> "영업 중"
+                "CLOSED" -> "영업 종료"
+                "PREPARING" -> "준비 중"
                 else -> "상태 알 수 없음"
             }
 

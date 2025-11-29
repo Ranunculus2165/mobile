@@ -1,66 +1,92 @@
 package com.wheats.api.store;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+/**
+ * /api/stores 관련 REST API 컨트롤러
+ */
 @RestController
 @RequestMapping("/api/stores")
-@CrossOrigin(origins = "*") // 모바일 앱에서 접근 허용
 public class StoreController {
 
-    private final List<Store> stores = new ArrayList<>();
-    private final Map<Long, List<MenuItem>> menusByStore = new HashMap<>();
+    // 간단하게 메모리 안에 가게/메뉴 데이터 보관
+    private final Map<Long, Store> storeMap = new LinkedHashMap<>();
 
     public StoreController() {
-        // --- 더미 가게 데이터 ---
-        stores.add(new Store(1L, "화이트해커 치킨 연세점", "OPEN", 15000, "30~40분"));
-        stores.add(new Store(2L, "버그없는 피자", "OPEN", 18000, "25~35분"));
-        stores.add(new Store(3L, "SQL 인젝션 떡볶이", "CLOSED", 12000, "준비중"));
-        stores.add(new Store(4L, "XSS 버거", "OPEN", 10000, "20~30분"));
-        stores.add(new Store(5L, "CSRF 돈까스", "OPEN", 13000, "35~45분"));
-
-        // --- 더미 메뉴 데이터 ---
-        menusByStore.put(1L, List.of(
-                new MenuItem(1L, 1L, "화이트해커 후라이드", "기본에 충실한 후라이드 치킨", 18000),
-                new MenuItem(2L, 1L, "화이트해커 양념치킨", "달콤 매콤 양념", 19000)
-        ));
-
-        menusByStore.put(2L, List.of(
-                new MenuItem(3L, 2L, "버그없는 페퍼로니 피자", "토핑 듬뿍 페퍼로니", 21000),
-                new MenuItem(4L, 2L, "디버깅 콤비네이션 피자", "다양한 토핑 조합", 23000)
-        ));
-
-        menusByStore.put(3L, List.of(
-                new MenuItem(5L, 3L, "SQL 인젝션 떡볶이 보통맛", "기본 떡볶이", 8000)
-        ));
-
-        // 나머지는 공통 메뉴
-        menusByStore.putIfAbsent(4L, List.of(
-                new MenuItem(6L, 4L, "XSS 치즈버거 세트", "버거 + 감튀 + 콜라", 12000)
-        ));
-        menusByStore.putIfAbsent(5L, List.of(
-                new MenuItem(7L, 5L, "CSRF 등심돈까스", "바삭한 돈까스 정식", 11000)
-        ));
+        initDummyData();
     }
 
-    // 1. 가게 목록
+    // 초기 더미 데이터 - 나중에 DB 붙이면 여기 부분만 교체하면 됨
+    private void initDummyData() {
+        // 가게 1번 메뉴
+        List<MenuItem> store1Menus = Arrays.asList(
+                new MenuItem(1L, "치즈버거 세트", 7500, "두툼한 패티와 치즈가 들어간 버거 세트"),
+                new MenuItem(2L, "감자튀김", 2500, "바삭바삭 감자튀김"),
+                new MenuItem(3L, "콜라", 1500, "탄산 가득 콜라")
+        );
+
+        // 가게 2번 메뉴
+        List<MenuItem> store2Menus = Arrays.asList(
+                new MenuItem(1L, "마르게리따 피자", 13000, "기본에 충실한 클래식 피자"),
+                new MenuItem(2L, "고르곤졸라 피자", 15000, "꿀과 함께 먹는 치즈 피자"),
+                new MenuItem(3L, "제로 콜라", 2000, "칼로리 부담 없는 콜라")
+        );
+
+        // 가게 3번 메뉴
+        List<MenuItem> store3Menus = Arrays.asList(
+                new MenuItem(1L, "후라이드 치킨", 17000, "겉바속촉 기본 치킨"),
+                new MenuItem(2L, "양념 치킨", 18000, "달콤한 양념 소스 치킨"),
+                new MenuItem(3L, "치즈볼", 5000, "달콤 짭조름 치즈볼")
+        );
+
+        storeMap.clear();
+        storeMap.put(1L, new Store(1L, "버거하우스", StoreStatus.OPEN, store1Menus));
+        storeMap.put(2L, new Store(2L, "피자공방", StoreStatus.PREPARING, store2Menus));
+        storeMap.put(3L, new Store(3L, "치킨타운", StoreStatus.CLOSED, store3Menus));
+    }
+
+    /**
+     * 가게 목록 조회
+     * GET /api/stores
+     */
     @GetMapping
     public List<Store> getStores() {
-        return stores;
+        // Map → List 로 변환해서 반환
+        return new ArrayList<>(storeMap.values());
     }
 
-    // 2. 가게 상세 + 메뉴
-    @GetMapping("/{id}")
-    public ResponseEntity<StoreDetailResponse> getStoreDetail(@PathVariable Long id) {
-        return stores.stream()
-                .filter(s -> s.getId().equals(id))
-                .findFirst()
-                .map(store -> {
-                    List<MenuItem> menus = menusByStore.getOrDefault(id, List.of());
-                    return ResponseEntity.ok(new StoreDetailResponse(store, menus));
-                })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    /**
+     * 가게 상세 조회
+     * GET /api/stores/{storeId}
+     * (가게 정보 + 메뉴까지 한 번에 내려줌)
+     */
+    @GetMapping("/{storeId}")
+    public ResponseEntity<Store> getStoreDetail(@PathVariable Long storeId) {
+        Store store = storeMap.get(storeId);
+        if (store == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(store);
+    }
+
+    /**
+     * 특정 가게의 메뉴만 별도로 조회
+     * GET /api/stores/{storeId}/menus
+     */
+    @GetMapping("/{storeId}/menus")
+    public ResponseEntity<List<MenuItem>> getStoreMenus(@PathVariable Long storeId) {
+        Store store = storeMap.get(storeId);
+        if (store == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        List<MenuItem> menus = store.getMenus();
+        if (menus == null) {
+            menus = Collections.emptyList();
+        }
+        return ResponseEntity.ok(menus);
     }
 }

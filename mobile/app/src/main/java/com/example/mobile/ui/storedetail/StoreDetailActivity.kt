@@ -52,8 +52,9 @@ class StoreDetailActivity : AppCompatActivity() {
         // 상단 가게 정보 표시
         tvStoreName.text = storeName
         tvStoreStatus.text = when (status) {
-            "OPEN" -> "영업중"
-            "CLOSED" -> "준비중"
+            "OPEN" -> "영업 중"
+            "CLOSED" -> "영업 종료"
+            "PREPARING" -> "준비 중"
             else -> "상태 알 수 없음"
         }
         val minOrderText = String.format("최소주문 %,d원", minOrder)

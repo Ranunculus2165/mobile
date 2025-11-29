@@ -3,39 +3,49 @@ package com.wheats.api.store;
 public class MenuItem {
 
     private Long id;
-    private Long storeId;
     private String name;
-    private String description;
-    private int price;
-
-    public MenuItem(Long id, Long storeId, String name, String description, int price) {
-        this.id = id;
-        this.storeId = storeId;
-        this.name = name;
-        this.description = description;
-        this.price = price;
-    }
+    private int price;          // 원 단위
+    private String description; // 메뉴 설명
 
     public MenuItem() {
+    }
+
+    public MenuItem(Long id, String name, int price, String description) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.description = description;
     }
 
     public Long getId() {
         return id;
     }
 
-    public Long getStoreId() {
-        return storeId;
-    }
-
     public String getName() {
         return name;
+    }
+
+    public int getPrice() {
+        return price;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public int getPrice() {
-        return price;
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

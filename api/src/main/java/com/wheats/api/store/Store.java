@@ -1,22 +1,22 @@
 package com.wheats.api.store;
 
+import java.util.List;
+
 public class Store {
 
     private Long id;
     private String name;
-    private String status;              // "OPEN", "CLOSED" ...
-    private int minOrderAmount;         // 최소 주문 금액
-    private String estimatedDeliveryTime; // "30~40분" 이런 문자열
+    private StoreStatus status;
+    private List<MenuItem> menus;
 
-    public Store(Long id, String name, String status, int minOrderAmount, String estimatedDeliveryTime) {
+    public Store() {
+    }
+
+    public Store(Long id, String name, StoreStatus status, List<MenuItem> menus) {
         this.id = id;
         this.name = name;
         this.status = status;
-        this.minOrderAmount = minOrderAmount;
-        this.estimatedDeliveryTime = estimatedDeliveryTime;
-    }
-
-    public Store() {
+        this.menus = menus;
     }
 
     public Long getId() {
@@ -27,15 +27,27 @@ public class Store {
         return name;
     }
 
-    public String getStatus() {
+    public StoreStatus getStatus() {
         return status;
     }
 
-    public int getMinOrderAmount() {
-        return minOrderAmount;
+    public List<MenuItem> getMenus() {
+        return menus;
     }
 
-    public String getEstimatedDeliveryTime() {
-        return estimatedDeliveryTime;
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setStatus(StoreStatus status) {
+        this.status = status;
+    }
+
+    public void setMenus(List<MenuItem> menus) {
+        this.menus = menus;
     }
 }
