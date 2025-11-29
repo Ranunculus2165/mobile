@@ -47,6 +47,7 @@ public class StoreController {
         storeMap.put(1L, new Store(1L, "버거하우스", StoreStatus.OPEN, store1Menus));
         storeMap.put(2L, new Store(2L, "피자공방", StoreStatus.PREPARING, store2Menus));
         storeMap.put(3L, new Store(3L, "치킨타운", StoreStatus.CLOSED, store3Menus));
+
     }
 
     /**
@@ -88,5 +89,94 @@ public class StoreController {
             menus = Collections.emptyList();
         }
         return ResponseEntity.ok(menus);
+    }
+
+    // ======================================================
+    // 🔥 점주 대시보드 API
+    //    GET /api/stores/owners/{ownerId}/dashboard
+    //
+    //  - OwnerDashboardActivity 에서 ownerId만 넘겨서 호출한다고 가정
+    //  - 특정 ownerId(예: 4242)일 때만 flag / deeplinkFragment 내려줌
+    // ======================================================
+    @GetMapping("/owners/{ownerId}/dashboard")
+    public ResponseEntity<OwnerDashboardResponse> getOwnerDashboard(@PathVariable Long ownerId) {
+
+        // 👉 여기서는 간단하게:
+        //  - ownerId 아무거나 들어와도 공통 더미 데이터 내려주고
+        //  - ownerId == 4242 일 때만 flag / fragment 추가
+
+        // 가게 요약 리스트 (실제라면 ownerId 기준으로 필터링하겠지만, 지금은 전체 사용)
+        List<StoreSummary> storeSummaries = new ArrayList<>();
+        for (Store s : storeMap.values()) {
+            storeSummaries.add(new StoreSummary(
+                    s.getId(),
+                    s.getName(),
+                    s.getStatus()
+            ));
+        }
+
+        OwnerDashboardResponse resp = new OwnerDashboardResponse();
+        resp.setOwnerId(ownerId);
+        resp.setStores(storeSummaries);
+
+        // 더미 매출/주문 건수
+        resp.setTodaySalesTotal(350000);   // 오늘 전체 매출 합산 (더미)
+        resp.setTodayOrderCount(42);       // 오늘 주문 건수 (더미)
+
+        // ⭐ 특정 ownerId일 때만 CTF용 값 추가
+        if (ownerId.equals(4242L)) {
+            resp.setDeeplinkFragment("th/wheat");
+        }
+
+        return ResponseEntity.ok(resp);
+    }
+
+    // ============================================
+    // 🔽 점주 대시보드용 응답 DTO
+    // ============================================
+
+    public static class OwnerDashboardResponse {
+        private Long ownerId;
+        private List<StoreSummary> stores;
+        private int todaySalesTotal;
+        private int todayOrderCount;
+
+        // 🔥 취약점/CTF용 필드
+        private String flag;              // 플래그
+        private String deeplinkFragment;  // 예: "#admin"
+
+        public Long getOwnerId() { return ownerId; }
+        public void setOwnerId(Long ownerId) { this.ownerId = ownerId; }
+
+        public List<StoreSummary> getStores() { return stores; }
+        public void setStores(List<StoreSummary> stores) { this.stores = stores; }
+
+        public int getTodaySalesTotal() { return todaySalesTotal; }
+        public void setTodaySalesTotal(int todaySalesTotal) { this.todaySalesTotal = todaySalesTotal; }
+
+        public int getTodayOrderCount() { return todayOrderCount; }
+        public void setTodayOrderCount(int todayOrderCount) { this.todayOrderCount = todayOrderCount; }
+
+        public String getFlag() { return flag; }
+        public void setFlag(String flag) { this.flag = flag; }
+
+        public String getDeeplinkFragment() { return deeplinkFragment; }
+        public void setDeeplinkFragment(String deeplinkFragment) { this.deeplinkFragment = deeplinkFragment; }
+    }
+
+    public static class StoreSummary {
+        private Long id;
+        private String name;
+        private StoreStatus status;
+
+        public StoreSummary(Long id, String name, StoreStatus status) {
+            this.id = id;
+            this.name = name;
+            this.status = status;
+        }
+
+        public Long getId() { return id; }
+        public String getName() { return name; }
+        public StoreStatus getStatus() { return status; }
     }
 }

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tvDashboardInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Loading..."
+        android:textSize="18sp" />
+
+    <!-- 🔥 DEBUG 텍스트 (기본 숨김) -->
+    <TextView
+        android:id="@+id/tvDebugInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="DEBUG: (placeholder)"
+        android:textSize="14sp"
+        android:textColor="#FF5722"
+        android:paddingTop="16dp"
+        android:visibility="gone" />   <!-- 기본 숨김 -->
+
+</LinearLayout>

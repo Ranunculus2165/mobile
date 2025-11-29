@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.mobile">
 
-    <!-- ★ HTTP 통신용 권한 -->
+    <!-- 인터넷 권한 -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -14,7 +14,7 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:usesCleartextTraffic="true">
 
-        <!-- 목록 화면 (런처) -->
+        <!-- 앱 최초 실행 화면 -->
         <activity
             android:name=".ui.storelist.StoreListActivity"
             android:exported="true">
@@ -24,9 +24,28 @@
             </intent-filter>
         </activity>
 
-        <!-- 상세 화면 -->
+        <!-- 가게 상세 화면 -->
+        <activity android:name=".ui.storedetail.StoreDetailActivity" />
+
+        <!-- 점주 대시보드 (딥링크 취약점 진입점) -->
         <activity
-            android:name=".ui.storedetail.StoreDetailActivity" />
+            android:name=".ui.owner.OwnerDashboardActivity"
+            android:exported="true">
+
+            <!-- deliveryapp://owner/dashboard?storeId=... 로 접근 가능 -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="deliveryapp"
+                    android:host="owner"
+                    android:path="/dashboard" />
+            </intent-filter>
+        </activity>
+
 
     </application>
 
