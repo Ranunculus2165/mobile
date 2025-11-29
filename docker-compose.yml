@@ -1,12 +1,29 @@
 services:
   api:
     build:
-      # 📌 빌드 컨텍스트 = WH_EATS 루트
       context: .
-      # 📌 사용할 Dockerfile 위치
       dockerfile: docker/api/Dockerfile
     container_name: wh-eats-api
     ports:
-      - "8080:8080"     # localhost:8080 → 컨테이너 8080
+      - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=default
+      SPRING_PROFILES_ACTIVE: default
+
+  db:
+    build:
+      context: .                # ✅ 프로젝트 루트 전체를 컨텍스트로
+      dockerfile: docker/db/Dockerfile   # ✅ 실제 Dockerfile 위치
+    container_name: wheats-db
+    environment:
+      MYSQL_DATABASE: wheats
+      MYSQL_USER: wheats
+      MYSQL_PASSWORD: wheats
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - wheats-mysql-data:/var/lib/mysql
+    restart: always
+
+volumes:
+  wheats-mysql-data:

@@ -1,4 +1,4 @@
-package com.wheats.api.store;
+package com.wheats.api.store.dto;
 
 public enum StoreStatus {
     OPEN,      // 영업 중

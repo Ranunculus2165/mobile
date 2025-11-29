@@ -1,4 +1,4 @@
-package com.wheats.api.store;
+package com.wheats.api.store.dto;
 
 import java.util.List;
 
