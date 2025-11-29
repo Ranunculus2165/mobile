@@ -1,4 +1,4 @@
-package  com.wheats.api.mypage.controller;
+package com.wheats.api.mypage.controller;
 
 import com.wheats.api.mypage.dto.MyPageProfileResponse;
 import com.wheats.api.mypage.service.MyPageService;

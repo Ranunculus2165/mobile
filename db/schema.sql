@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS carts (
     FOREIGN KEY (store_id) REFERENCES stores(id)
     ON DELETE CASCADE,
   KEY idx_carts_user (user_id),
-  KEY idx_carts_store (store_id)
+  KEY idx_carts_store (store_id),
   UNIQUE KEY uk_carts_user_store_active (user_id, store_id, status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
