@@ -10,15 +10,11 @@ public class MenuEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // store_id FK
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "store_id", nullable = false)
-    private StoreEntity store;
+    @Column(name = "store_id")
+    private Long storeId;
 
     private String name;
     private Integer price;
-
-    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "is_available")
@@ -27,21 +23,25 @@ public class MenuEntity {
     @Column(name = "image_url")
     private String imageUrl;
 
-    protected MenuEntity() {}
-
+    // --- getter / setter ---
     public Long getId() { return id; }
-    public StoreEntity getStore() { return store; }
-    public String getName() { return name; }
-    public Integer getPrice() { return price; }
-    public String getDescription() { return description; }
-    public Boolean getIsAvailable() { return isAvailable; }
-    public String getImageUrl() { return imageUrl; }
-
     public void setId(Long id) { this.id = id; }
-    public void setStore(StoreEntity store) { this.store = store; }
+
+    public Long getStoreId() { return storeId; }
+    public void setStoreId(Long storeId) { this.storeId = storeId; }
+
+    public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+
+    public Integer getPrice() { return price; }
     public void setPrice(Integer price) { this.price = price; }
+
+    public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-    public void setIsAvailable(Boolean isAvailable) { this.isAvailable = isAvailable; }
+
+    public Boolean getIsAvailable() { return isAvailable; }
+    public void setIsAvailable(Boolean available) { isAvailable = available; }
+
+    public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

@@ -5,7 +5,9 @@ import com.wheats.api.store.dto.Store;
 import com.wheats.api.store.dto.StoreDetailResponse;
 import com.wheats.api.store.dto.StoreStatus;
 import com.wheats.api.store.entity.StoreEntity;
+import com.wheats.api.store.entity.MenuEntity;
 import com.wheats.api.store.repository.StoreRepository;
+import com.wheats.api.store.repository.MenuRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,9 +17,12 @@ import java.util.List;
 public class StoreService {
 
     private final StoreRepository storeRepository;
+    private final MenuRepository menuRepository;
 
-    public StoreService(StoreRepository storeRepository) {
+    public StoreService(StoreRepository storeRepository,
+                        MenuRepository menuRepository) {
         this.storeRepository = storeRepository;
+        this.menuRepository = menuRepository;
     }
 
     /** 전체 목록 조회 */
@@ -29,20 +34,27 @@ public class StoreService {
         return result;
     }
 
-    /** 상세 조회: Store + 메뉴 리스트 (메뉴는 일단 빈 리스트) */
+    /** 상세 조회: Store + 메뉴 리스트 (실제 DB에서 메뉴 조회) */
     public StoreDetailResponse getStoreDetail(Long id) {
         StoreEntity entity = storeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Store Not Found: " + id));
 
         Store storeDto = toStoreDto(entity);
 
-        // 메뉴는 일단 DB 안 쓰고 빈 리스트로 (필요하면 menuRepository 붙이면 됨)
+        // 🔥 여기서 실제 DB에서 메뉴 가져오기
+        // MenuRepository에 아래 메서드가 있다고 가정:
+        // List<MenuEntity> findByStoreIdAndIsAvailableTrue(Long storeId);
+        List<MenuEntity> menuEntities = menuRepository.findByStoreIdAndIsAvailableTrue(id);
+
         List<MenuItem> menus = new ArrayList<>();
+        for (MenuEntity m : menuEntities) {
+            menus.add(toMenuItemDto(m));
+        }
 
         return new StoreDetailResponse(storeDto, menus);
     }
 
-    /** Entity → DTO 변환 */
+    /** Store Entity → DTO 변환 */
     private Store toStoreDto(StoreEntity e) {
         Store dto = new Store();
         dto.setId(e.getId());
@@ -59,6 +71,19 @@ public class StoreService {
                 ? StoreStatus.OPEN
                 : StoreStatus.CLOSED);
 
+        return dto;
+    }
+
+    /** Menu Entity → MenuItem DTO 변환 */
+    private MenuItem toMenuItemDto(MenuEntity e) {
+        MenuItem dto = new MenuItem();
+        dto.setId(e.getId());
+        dto.setName(e.getName());
+        dto.setPrice(e.getPrice());
+        dto.setDescription(e.getDescription());
+        // 필드명은 프로젝트 실제 필드에 맞게 조정
+        dto.setAvailable(e.getIsAvailable() != null && e.getIsAvailable());
+        dto.setImageUrl(e.getImageUrl());
         return dto;
     }
 }

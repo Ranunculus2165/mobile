@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface MenuRepository extends JpaRepository<MenuEntity, Long> {
 
-    // store.id 기준으로 메뉴 찾기
-    List<MenuEntity> findByStore_Id(Long storeId);
+    // store_id로 메뉴 조회 (판매 중인 것만)
+    List<MenuEntity> findByStoreIdAndIsAvailableTrue(Long storeId);
 }
