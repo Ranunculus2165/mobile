@@ -1,0 +1,27 @@
+server:
+  port: 8080
+
+spring:
+  jackson:
+    serialization:
+      indent-output: true
+
+  datasource:
+    url: jdbc:mysql://db:3306/wheats?serverTimezone=Asia/Seoul&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
+    username: wheats
+    password: wheats
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none        # 테이블은 schema.sql에서 생성하니까 여기서는 건들지 않도록 none
+    show-sql: true          # 콘솔에 SQL 찍기
+    properties:
+      hibernate:
+        format_sql: true    # SQL 이쁘게 출력
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
