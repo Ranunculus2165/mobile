@@ -2,6 +2,7 @@ package com.example.mobile.data.network
 
 import com.example.mobile.data.model.CreateSupportTicketRequest
 import com.example.mobile.data.model.MyPageProfileResponse
+import com.example.mobile.data.model.MyPageResponse
 import com.example.mobile.data.model.SupportTicketResponse
 import retrofit2.Call
 import retrofit2.http.Body
@@ -13,6 +14,7 @@ import retrofit2.http.POST
  *
  * 서버 컨트롤러 기준:
  * - GET  /api/users/me
+ * - GET  /api/users/me/page
  * - GET  /api/users/me/support-tickets
  * - POST /api/users/me/support-tickets
  *
@@ -27,6 +29,13 @@ interface MyPageApi {
      */
     @GET("/api/users/me")
     fun getMyProfile(): Call<MyPageProfileResponse>
+
+    /**
+     * 마이페이지 전체 정보 조회 (프로필 + 주문 내역)
+     * GET /api/users/me/page
+     */
+    @GET("/api/users/me/page")
+    fun getMyPage(): Call<MyPageResponse>
 
     /**
      * 내 1:1 문의 목록 조회

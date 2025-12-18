@@ -46,6 +46,9 @@
             </intent-filter>
         </activity>
 
+        <!-- 마이페이지 -->
+        <activity android:name=".ui.mypage.MyPageActivity" />
+
 
     </application>
 

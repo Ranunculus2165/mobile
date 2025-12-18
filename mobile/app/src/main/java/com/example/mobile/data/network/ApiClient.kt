@@ -11,4 +11,5 @@ object ApiClient {
         .build()
 
     val storeApi: StoreApi = retrofit.create(StoreApi::class.java)
+    val myPageApi: MyPageApi = retrofit.create(MyPageApi::class.java)
 }
