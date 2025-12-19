@@ -1,7 +1,9 @@
 package com.example.mobile.ui.storedetail
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -9,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
 import com.example.mobile.data.network.ApiClient
+import com.example.mobile.ui.cart.CartActivity
 import kotlinx.coroutines.launch
 
 class StoreDetailActivity : AppCompatActivity() {
@@ -26,6 +29,8 @@ class StoreDetailActivity : AppCompatActivity() {
     private lateinit var tvMinOrderAndTime: TextView
     private lateinit var rvMenu: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
+    private lateinit var layoutCartButton: android.view.ViewGroup
+    private lateinit var tvCartBadge: TextView
 
     private var storeId: Long = -1L
 
@@ -38,13 +43,10 @@ class StoreDetailActivity : AppCompatActivity() {
         tvStoreStatus = findViewById(R.id.tvDetailStoreStatus)
         tvMinOrderAndTime = findViewById(R.id.tvDetailMinOrderAndTime)
         rvMenu = findViewById(R.id.rvMenuList)
+        layoutCartButton = findViewById(R.id.layoutCartButton)
+        tvCartBadge = findViewById(R.id.tvCartBadge)
 
-        // 리사이클러뷰 세팅
-        menuAdapter = MenuAdapter()
-        rvMenu.layoutManager = LinearLayoutManager(this)
-        rvMenu.adapter = menuAdapter
-
-        // 인텐트에서 값 받기 (목록 화면에서 넘겨준 값)
+        // 인텐트에서 값 받기 (목록 화면에서 넘겨준 값) - 먼저 받아야 함!
         storeId = intent.getLongExtra(EXTRA_STORE_ID, -1L)
         val storeNameFromList = intent.getStringExtra(EXTRA_STORE_NAME) ?: "알 수 없는 가게"
         val statusFromList = intent.getStringExtra(EXTRA_STORE_STATUS) ?: "UNKNOWN"
@@ -54,6 +56,20 @@ class StoreDetailActivity : AppCompatActivity() {
         if (storeId == -1L) {
             finish()
             return
+        }
+
+        // 리사이클러뷰 세팅 - storeId를 받은 후에 생성
+        menuAdapter = MenuAdapter(storeId, lifecycleScope) {
+            // 장바구니 추가 성공 시 콜백
+            updateCartBadge()
+        }
+        rvMenu.layoutManager = LinearLayoutManager(this)
+        rvMenu.adapter = menuAdapter
+
+        // 플로팅 버튼 클릭 리스너
+        layoutCartButton.setOnClickListener {
+            val intent = Intent(this, CartActivity::class.java)
+            startActivity(intent)
         }
 
         // 일단 목록에서 받은 값으로 먼저 보여주고
@@ -69,6 +85,47 @@ class StoreDetailActivity : AppCompatActivity() {
 
         // 🔥 실제 API에서 상세 정보 + 메뉴 목록 불러오기
         loadStoreDetail(storeId)
+        
+        // 장바구니 상태 확인
+        updateCartBadge()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 화면이 다시 보일 때 장바구니 상태 업데이트
+        updateCartBadge()
+    }
+
+    private fun updateCartBadge() {
+        lifecycleScope.launch {
+            try {
+                val cart = ApiClient.cartApi.getMyCart()
+                if (cart != null && cart.items.isNotEmpty()) {
+                    val itemCount = cart.items.sumOf { it.quantity }
+                    tvCartBadge.text = itemCount.toString()
+                    tvCartBadge.visibility = View.VISIBLE
+                    layoutCartButton.visibility = View.VISIBLE
+                } else {
+                    tvCartBadge.visibility = View.GONE
+                    layoutCartButton.visibility = View.GONE
+                }
+            } catch (e: retrofit2.HttpException) {
+                if (e.code() == 404) {
+                    // 장바구니가 비어있음
+                    tvCartBadge.visibility = View.GONE
+                    layoutCartButton.visibility = View.GONE
+                } else {
+                    Log.e("StoreDetailActivity", "장바구니 상태 확인 실패", e)
+                    tvCartBadge.visibility = View.GONE
+                    layoutCartButton.visibility = View.GONE
+                }
+            } catch (e: Exception) {
+                Log.e("StoreDetailActivity", "장바구니 상태 확인 실패", e)
+                // 에러 발생 시에도 버튼은 숨김
+                tvCartBadge.visibility = View.GONE
+                layoutCartButton.visibility = View.GONE
+            }
+        }
     }
 
     private fun loadStoreDetail(storeId: Long) {

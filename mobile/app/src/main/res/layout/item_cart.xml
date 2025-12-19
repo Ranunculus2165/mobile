@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="12dp"
+        android:padding="16dp"
         android:gravity="center_vertical">
 
         <LinearLayout
@@ -21,7 +21,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tvMenuName"
+                android:id="@+id/tvCartItemName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="메뉴 이름"
@@ -29,34 +29,25 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tvMenuDesc"
+                android:id="@+id/tvCartItemQuantity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="메뉴 설명"
-                android:textSize="13sp"
-                android:paddingTop="4dp" />
-
-            <TextView
-                android:id="@+id/tvMenuPrice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="9,000원"
+                android:text="1개"
                 android:textSize="14sp"
-                android:textStyle="bold"
-                android:paddingTop="6dp" />
+                android:paddingTop="4dp" />
 
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btnAddToCart"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:text="+"
-            android:textSize="24sp"
-            android:textColor="@android:color/white"
-            android:background="#20B2AA"
-            android:layout_marginStart="12dp" />
+        <TextView
+            android:id="@+id/tvCartItemPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="9,000원"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#20B2AA" />
 
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>
+

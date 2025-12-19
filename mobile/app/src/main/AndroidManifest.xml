@@ -27,6 +27,9 @@
         <!-- 가게 상세 화면 -->
         <activity android:name=".ui.storedetail.StoreDetailActivity" />
 
+        <!-- 장바구니 화면 -->
+        <activity android:name=".ui.cart.CartActivity" />
+
         <!-- 점주 대시보드 (딥링크 취약점 진입점) -->
         <activity
             android:name=".ui.owner.OwnerDashboardActivity"

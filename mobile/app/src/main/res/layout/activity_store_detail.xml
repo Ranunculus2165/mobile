@@ -52,4 +52,56 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- 장바구니 플로팅 버튼 -->
+    <LinearLayout
+        android:id="@+id/layoutCartButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#20B2AA"
+        android:padding="16dp"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_margin="16dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_view"
+            android:tint="@android:color/white" />
+
+        <TextView
+            android:id="@+id/tvCartButtonText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="장바구니 보기"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
+
+    <!-- 장바구니 아이템 개수 배지 -->
+    <TextView
+        android:id="@+id/tvCartBadge"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:text="0"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:background="@drawable/cart_badge_background"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/layoutCartButton"
+        app:layout_constraintEnd_toEndOf="@id/layoutCartButton"
+        android:layout_marginTop="-8dp"
+        android:layout_marginEnd="-8dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
