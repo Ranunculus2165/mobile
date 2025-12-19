@@ -3,16 +3,16 @@ package com.example.mobile.ui.storelist
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
 import com.example.mobile.data.model.Store
 import com.example.mobile.data.network.ApiClient
+import com.example.mobile.ui.base.BaseActivity
 import com.example.mobile.ui.storedetail.StoreDetailActivity
 import kotlinx.coroutines.*
 
-class StoreListActivity : AppCompatActivity() {
+class StoreListActivity : BaseActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: StoreListAdapter

@@ -2,17 +2,17 @@ package com.example.mobile.ui.mypage
 
 import android.os.Bundle
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
 import com.example.mobile.data.model.MyPageResponse
 import com.example.mobile.data.network.ApiClient
+import com.example.mobile.ui.base.BaseActivity
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MyPageActivity : AppCompatActivity() {
+class MyPageActivity : BaseActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: OrderHistoryAdapter

@@ -7,17 +7,17 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
 import com.example.mobile.data.model.CartResponse
 import com.example.mobile.data.network.ApiClient
+import com.example.mobile.ui.base.BaseActivity
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
 
-class OrderActivity : AppCompatActivity() {
+class OrderActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_CART = "extra_cart"

@@ -5,16 +5,16 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
 import com.example.mobile.data.network.ApiClient
+import com.example.mobile.ui.base.BaseActivity
 import com.example.mobile.ui.cart.CartActivity
 import kotlinx.coroutines.launch
 
-class StoreDetailActivity : AppCompatActivity() {
+class StoreDetailActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_STORE_ID = "extra_store_id"
