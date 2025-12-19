@@ -127,6 +127,10 @@ public class OrderService {
                 totalPrice
         );
         order = orderRepository.save(order);
+        
+        // 결제 완료 시간 설정
+        order.setPaidAt(LocalDateTime.now());
+        order = orderRepository.save(order);
 
         // 8) 주문 아이템 엔티티 생성
         List<OrderItemEntity> orderItems = new ArrayList<>();
@@ -148,8 +152,8 @@ public class OrderService {
         // 9) 장바구니 아이템들 삭제
         cartItemRepository.deleteAll(cartItems);
 
-        // 10) 장바구니 삭제
-        cartRepository.delete(cart);
+        // 10) 장바구니 삭제 (ID로 직접 삭제하여 상태 변경 방지)
+        cartRepository.deleteById(cart.getId());
 
         // 11) 응답 DTO로 변환
         return new OrderResponse(
