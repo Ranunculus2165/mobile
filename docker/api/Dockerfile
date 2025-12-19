@@ -12,7 +12,7 @@ COPY api/ .
 RUN chmod +x ./gradlew && ./gradlew bootJar --no-daemon
 
 # 2단계: 경량 JRE 이미지로 실행
-FROM eclipse-temurin:17-jre-alpine
+FROM --platform=linux/amd64 eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
