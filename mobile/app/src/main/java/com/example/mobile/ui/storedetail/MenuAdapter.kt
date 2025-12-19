@@ -75,11 +75,6 @@ class MenuAdapter(
                     
                     val response = ApiClient.cartApi.addItemToCart(request)
                     android.util.Log.d("MenuAdapter", "장바구니 추가 성공: $response")
-                    Toast.makeText(
-                        itemView.context,
-                        "${item.name}이(가) 장바구니에 추가되었습니다",
-                        Toast.LENGTH_SHORT
-                    ).show()
                     // 장바구니 업데이트 콜백 호출
                     onCartUpdated?.invoke()
                 } catch (e: retrofit2.HttpException) {
