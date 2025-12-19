@@ -30,6 +30,9 @@
         <!-- 장바구니 화면 -->
         <activity android:name=".ui.cart.CartActivity" />
 
+        <!-- 주문 화면 -->
+        <activity android:name=".ui.order.OrderActivity" />
+
         <!-- 점주 대시보드 (딥링크 취약점 진입점) -->
         <activity
             android:name=".ui.owner.OwnerDashboardActivity"

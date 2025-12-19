@@ -28,4 +28,5 @@ object ApiClient {
     val storeApi: StoreApi = retrofit.create(StoreApi::class.java)
     val myPageApi: MyPageApi = retrofit.create(MyPageApi::class.java)
     val cartApi: CartApi = retrofit.create(CartApi::class.java)
+    val orderApi: OrderApi = retrofit.create(OrderApi::class.java)
 }

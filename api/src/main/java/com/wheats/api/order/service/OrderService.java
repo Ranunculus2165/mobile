@@ -1,5 +1,6 @@
 package com.wheats.api.order.service;
 
+import com.wheats.api.mypage.entity.UserEntity;
 import com.wheats.api.mypage.repository.UserRepository;
 import com.wheats.api.order.dto.OrderDetailResponse;
 import com.wheats.api.order.dto.OrderItemResponse;
@@ -16,6 +17,7 @@ import com.wheats.api.order.repository.CartRepository;
 import com.wheats.api.order.repository.OrderItemRepository;
 import com.wheats.api.order.repository.OrderRepository;
 import com.wheats.api.store.entity.MenuEntity;
+import com.wheats.api.store.entity.StoreEntity;
 import com.wheats.api.store.repository.MenuRepository;
 import com.wheats.api.store.repository.StoreRepository;
 import org.springframework.stereotype.Service;
@@ -80,19 +82,40 @@ public class OrderService {
         }
 
         // 3) 총 금액 계산 (각 메뉴 가격 * 수량)
-        int totalPrice = 0;
+        int orderAmount = 0;
         for (CartItemEntity item : cartItems) {
             Long menuId = item.getMenuId();
             MenuEntity menu = menuRepository.findById(menuId)
                     .orElseThrow(() -> new IllegalArgumentException("메뉴를 찾을 수 없습니다. id=" + menuId));
 
-            totalPrice += menu.getPrice() * item.getQuantity();
+            orderAmount += menu.getPrice() * item.getQuantity();
         }
 
-        // 4) 주문번호 생성 (간단 버전)
+        // 4) 배달료 조회
+        StoreEntity store = storeRepository.findById(cart.getStoreId())
+                .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다. id=" + cart.getStoreId()));
+        int deliveryFee = (store.getDeliveryTip() != null) ? store.getDeliveryTip() : 0;
+        int totalPrice = orderAmount + deliveryFee;
+
+        // 5) 사용자 포인트 확인 및 차감
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. id=" + userId));
+
+        if (user.getPoint() < totalPrice) {
+            throw new IllegalStateException(
+                    String.format("포인트가 부족합니다. 잔여 포인트: %,d원, 필요 포인트: %,d원", 
+                            user.getPoint(), totalPrice)
+            );
+        }
+
+        // 포인트 차감
+        user.setPoint(user.getPoint() - totalPrice);
+        userRepository.save(user);
+
+        // 6) 주문번호 생성 (간단 버전)
         String orderNumber = generateOrderNumber();
 
-        // 5) 주문 엔티티 생성 (이미 정의된 생성자 시그니처에 맞춤)
+        // 7) 주문 엔티티 생성 (이미 정의된 생성자 시그니처에 맞춤)
         //    OrderEntity(Long userId, Long storeId, Long cartId,
         //                String orderNumber, OrderStatus status, int totalPrice)
         OrderEntity order = new OrderEntity(
@@ -100,12 +123,12 @@ public class OrderService {
                 cart.getStoreId(),
                 cart.getId(),
                 orderNumber,
-                OrderStatus.PAID,   // 결제까지 완료된 상태라고 가정
+                OrderStatus.PAID,   // 결제까지 완료된 상태
                 totalPrice
         );
         order = orderRepository.save(order);
 
-        // 6) 주문 아이템 엔티티 생성
+        // 8) 주문 아이템 엔티티 생성
         List<OrderItemEntity> orderItems = new ArrayList<>();
         for (CartItemEntity item : cartItems) {
             Long menuId = item.getMenuId();
@@ -122,11 +145,11 @@ public class OrderService {
         }
         orderItemRepository.saveAll(orderItems);
 
-        // 7) 장바구니 상태 변경
+        // 9) 장바구니 상태 변경
         cart.setStatus(CartStatus.ORDERED);
         cartRepository.save(cart);
 
-        // 8) 응답 DTO로 변환
+        // 10) 응답 DTO로 변환
         return new OrderResponse(
                 order.getId(),
                 order.getOrderNumber(),
