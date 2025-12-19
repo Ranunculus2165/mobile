@@ -145,11 +145,13 @@ public class OrderService {
         }
         orderItemRepository.saveAll(orderItems);
 
-        // 9) 장바구니 상태 변경
-        cart.setStatus(CartStatus.ORDERED);
-        cartRepository.save(cart);
+        // 9) 장바구니 아이템들 삭제
+        cartItemRepository.deleteAll(cartItems);
 
-        // 10) 응답 DTO로 변환
+        // 10) 장바구니 삭제
+        cartRepository.delete(cart);
+
+        // 11) 응답 DTO로 변환
         return new OrderResponse(
                 order.getId(),
                 order.getOrderNumber(),

@@ -4,6 +4,7 @@ import com.wheats.api.order.entity.CartEntity;
 import com.wheats.api.order.entity.CartStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CartRepository extends JpaRepository<CartEntity, Long> {
@@ -17,4 +18,7 @@ public interface CartRepository extends JpaRepository<CartEntity, Long> {
             Long storeId,
             CartStatus status
     );
+
+    // user의 모든 ACTIVE 장바구니 조회
+    List<CartEntity> findByUserIdAndStatus(Long userId, CartStatus status);
 }

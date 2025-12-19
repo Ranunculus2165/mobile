@@ -56,6 +56,18 @@ public class CartService {
     public CartResponse addItem(Long userId, CartItemRequest request) {
         Long storeId = request.getStoreId();
 
+        // 다른 가게의 ACTIVE 장바구니가 있으면 삭제
+        List<CartEntity> otherStoreCarts = cartRepository.findByUserIdAndStatus(userId, CartStatus.ACTIVE);
+        for (CartEntity otherCart : otherStoreCarts) {
+            if (!otherCart.getStoreId().equals(storeId)) {
+                // 다른 가게의 장바구니 아이템들 삭제
+                List<CartItemEntity> otherCartItems = cartItemRepository.findByCartId(otherCart.getId());
+                cartItemRepository.deleteAll(otherCartItems);
+                // 다른 가게의 장바구니 삭제
+                cartRepository.delete(otherCart);
+            }
+        }
+
         // user + store 기준 ACTIVE 장바구니 조회 (없으면 새로 생성)
         CartEntity cart = cartRepository
                 .findFirstByUserIdAndStoreIdAndStatusOrderByCreatedAtDesc(userId, storeId, CartStatus.ACTIVE)
