@@ -90,26 +90,39 @@ public class CartService {
                     cartRepository.flush();
                 }
 
-                // 새 장바구니 생성
-                cart = cartRepository.save(new CartEntity(userId, storeId, CartStatus.ACTIVE));
+                // 같은 가게의 ACTIVE 장바구니가 이미 있는지 먼저 확인
+                Optional<CartEntity> existingActiveCart = cartRepository
+                        .findFirstByUserIdAndStoreIdAndStatusOrderByCreatedAtDesc(userId, storeId, CartStatus.ACTIVE);
+                
+                if (existingActiveCart.isPresent()) {
+                    // 이미 존재하면 기존 장바구니 사용
+                    cart = existingActiveCart.get();
+                } else {
+                    // 없을 때만 새로 생성
+                    cart = cartRepository.save(new CartEntity(userId, storeId, CartStatus.ACTIVE));
+                }
             }
         } else {
-            // 3. 같은 가게의 장바구니가 있다면 그대로 사용, 없으면 생성
-            cart = activeCarts.stream()
-                    .filter(c -> c.getStoreId().equals(storeId))
-                    .findFirst()
-                    .orElseGet(() -> {
-                        // 같은 가게의 ABANDONED 장바구니가 있으면 먼저 삭제 (유니크 제약조건 문제 방지)
-                        Optional<CartEntity> abandonedCartOpt = cartRepository
-                                .findFirstByUserIdAndStoreIdAndStatusOrderByCreatedAtDesc(userId, storeId, CartStatus.ABANDONED);
-                        if (abandonedCartOpt.isPresent()) {
-                            CartEntity abandonedCart = abandonedCartOpt.get();
-                            cartItemRepository.deleteAllByCartId(abandonedCart.getId());
-                            cartRepository.deleteById(abandonedCart.getId());
-                            cartRepository.flush();
-                        }
-                        return cartRepository.save(new CartEntity(userId, storeId, CartStatus.ACTIVE));
-                    });
+            // 3. 같은 가게의 ACTIVE 장바구니가 있는지 먼저 확인
+            Optional<CartEntity> existingActiveCart = cartRepository
+                    .findFirstByUserIdAndStoreIdAndStatusOrderByCreatedAtDesc(userId, storeId, CartStatus.ACTIVE);
+            
+            if (existingActiveCart.isPresent()) {
+                // 이미 존재하면 기존 장바구니 사용
+                cart = existingActiveCart.get();
+            } else {
+                // 같은 가게의 ABANDONED 장바구니가 있으면 먼저 삭제 (유니크 제약조건 문제 방지)
+                Optional<CartEntity> abandonedCartOpt = cartRepository
+                        .findFirstByUserIdAndStoreIdAndStatusOrderByCreatedAtDesc(userId, storeId, CartStatus.ABANDONED);
+                if (abandonedCartOpt.isPresent()) {
+                    CartEntity abandonedCart = abandonedCartOpt.get();
+                    cartItemRepository.deleteAllByCartId(abandonedCart.getId());
+                    cartRepository.deleteById(abandonedCart.getId());
+                    cartRepository.flush();
+                }
+                // 없을 때만 새로 생성
+                cart = cartRepository.save(new CartEntity(userId, storeId, CartStatus.ACTIVE));
+            }
         }
 
         // 4. 메뉴 추가 로직

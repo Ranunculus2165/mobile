@@ -19,7 +19,6 @@ spring:
     properties:
       hibernate:
         format_sql: true    # SQL 이쁘게 출력
-        dialect: org.hibernate.dialect.MySQL8Dialect
 
 logging:
   level:
