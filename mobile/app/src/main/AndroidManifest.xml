@@ -55,6 +55,9 @@
         <!-- 마이페이지 -->
         <activity android:name=".ui.mypage.MyPageActivity" />
 
+        <!-- 영수증 화면 -->
+        <activity android:name=".ui.receipt.ReceiptActivity" />
+
 
     </application>
 

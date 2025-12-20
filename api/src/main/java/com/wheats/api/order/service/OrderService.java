@@ -182,8 +182,10 @@ public class OrderService {
             throw new IllegalArgumentException("본인 주문이 아닙니다.");
         }
 
+        // 주문 아이템 조회
         List<OrderItemEntity> orderItems = orderItemRepository.findByOrderId(orderId);
         List<OrderItemResponse> itemResponses = new ArrayList<>();
+        int orderAmount = 0;
 
         for (OrderItemEntity item : orderItems) {
             Long menuId = item.getMenuId();
@@ -197,7 +199,28 @@ public class OrderService {
                     item.getQuantity(),
                     item.getUnitPrice()
             ));
+            orderAmount += item.getUnitPrice() * item.getQuantity();
         }
+
+        // 매장 정보 조회
+        StoreEntity store = storeRepository.findById(order.getStoreId())
+                .orElse(null);
+        String storeName = (store != null) ? store.getName() : "(삭제된 가게)";
+        String storeAddress = (store != null && store.getDescription() != null) 
+                ? store.getDescription() 
+                : "서울시 강남구 테헤란로 123"; // 기본 주소 (실제로는 별도 주소 필드 필요)
+        int deliveryFee = (store != null && store.getDeliveryTip() != null) 
+                ? store.getDeliveryTip() 
+                : 0;
+
+        // 사용자 정보 조회
+        UserEntity user = userRepository.findById(order.getUserId())
+                .orElse(null);
+        String userName = (user != null) ? user.getName() : "";
+        String userPhone = (user != null) ? user.getEmail() : ""; // email을 전화번호로 사용
+
+        // 영수증 플래그 조회
+        String receiptFlag = (order.getReceiptFlag() != null) ? order.getReceiptFlag() : "";
 
         return new OrderDetailResponse(
                 order.getId(),
@@ -206,7 +229,14 @@ public class OrderService {
                 order.getTotalPrice(),
                 order.getCreatedAt(),
                 order.getPaidAt(),
-                itemResponses
+                itemResponses,
+                storeName,
+                storeAddress,
+                deliveryFee,
+                orderAmount,
+                userName,
+                userEmail,
+                receiptFlag
         );
     }
 

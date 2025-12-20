@@ -1,14 +1,17 @@
 package com.example.mobile.ui.mypage
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
 import com.example.mobile.data.model.OrderHistoryItem
+import com.example.mobile.ui.receipt.ReceiptActivity
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -19,6 +22,7 @@ class OrderHistoryAdapter : ListAdapter<OrderHistoryItem, OrderHistoryAdapter.Vi
         val itemDescription: TextView = view.findViewById(R.id.tvItemDescription)
         val orderDate: TextView = view.findViewById(R.id.tvOrderDate)
         val status: TextView = view.findViewById(R.id.tvStatus)
+        val btnReceipt: Button = view.findViewById(R.id.btnReceipt)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -54,6 +58,13 @@ class OrderHistoryAdapter : ListAdapter<OrderHistoryItem, OrderHistoryAdapter.Vi
         }
 
         holder.status.text = item.status
+
+        // 영수증 출력 버튼 클릭 리스너
+        holder.btnReceipt.setOnClickListener {
+            val intent = Intent(holder.itemView.context, ReceiptActivity::class.java)
+            intent.putExtra(ReceiptActivity.EXTRA_ORDER_ID, item.orderId)
+            holder.itemView.context.startActivity(intent)
+        }
     }
 
     private class DiffCallback : DiffUtil.ItemCallback<OrderHistoryItem>() {
