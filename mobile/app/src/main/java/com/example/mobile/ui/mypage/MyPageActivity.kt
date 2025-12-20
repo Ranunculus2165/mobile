@@ -7,8 +7,10 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
+import com.example.mobile.data.auth.TokenManager
 import com.example.mobile.data.model.MyPageResponse
 import com.example.mobile.data.network.ApiClient
+import com.example.mobile.ui.auth.LoginActivity
 import com.example.mobile.ui.base.BaseActivity
 import com.example.mobile.ui.supportticket.SupportTicketListActivity
 import kotlinx.coroutines.*
@@ -39,6 +41,11 @@ class MyPageActivity : BaseActivity() {
             startActivity(intent)
         }
 
+        // 로그아웃 버튼 클릭 리스너
+        findViewById<Button>(R.id.btnLogout).setOnClickListener {
+            logout()
+        }
+
         loadMyPageData()
     }
 
@@ -65,6 +72,17 @@ class MyPageActivity : BaseActivity() {
                 ).show()
             }
         }
+    }
+
+    private fun logout() {
+        // 토큰 삭제
+        TokenManager.clearToken()
+
+        // 로그인 화면으로 이동
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 
     override fun onDestroy() {

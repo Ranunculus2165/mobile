@@ -1,5 +1,6 @@
 package com.wheats.api.order.controller;
 
+import com.wheats.api.auth.util.AuthContext;
 import com.wheats.api.order.dto.OrderDetailResponse;
 import com.wheats.api.order.dto.OrderRequest;
 import com.wheats.api.order.dto.OrderResponse;
@@ -25,8 +26,8 @@ public class OrderController {
      */
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@RequestBody OrderRequest request) {
-        // userId는 현재 Service 내부에서 1L 하드코딩 (MyPage / Cart와 동일)
-        OrderResponse response = orderService.createOrder(request);
+        Long userId = AuthContext.getCurrentUserId();
+        OrderResponse response = orderService.createOrder(userId, request);
         return ResponseEntity.ok(response);
     }
 
@@ -36,8 +37,8 @@ public class OrderController {
      */
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderDetailResponse> getOrderDetail(@PathVariable Long orderId) {
-        // 인증 붙이면 토큰에서 userId 꺼내서 Service로 넘기는 형태로 확장할 수 있음
-        OrderDetailResponse response = orderService.getOrderDetail(orderId);
+        Long userId = AuthContext.getCurrentUserId();
+        OrderDetailResponse response = orderService.getOrderDetail(userId, orderId);
         return ResponseEntity.ok(response);
     }
 }

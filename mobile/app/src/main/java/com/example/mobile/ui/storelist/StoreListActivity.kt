@@ -6,8 +6,10 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
+import com.example.mobile.data.auth.TokenManager
 import com.example.mobile.data.model.Store
 import com.example.mobile.data.network.ApiClient
+import com.example.mobile.ui.auth.LoginActivity
 import com.example.mobile.ui.base.BaseActivity
 import com.example.mobile.ui.storedetail.StoreDetailActivity
 import kotlinx.coroutines.*
@@ -23,6 +25,15 @@ class StoreListActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 로그인 체크
+        if (!TokenManager.hasToken()) {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_store_list)
 
         recyclerView = findViewById(R.id.rvStoreList)

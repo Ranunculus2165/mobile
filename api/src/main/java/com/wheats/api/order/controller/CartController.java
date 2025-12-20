@@ -1,5 +1,6 @@
 package com.wheats.api.order.controller;
 
+import com.wheats.api.auth.util.AuthContext;
 import com.wheats.api.order.dto.CartItemRequest;
 import com.wheats.api.order.dto.CartResponse;
 import com.wheats.api.order.dto.UpdateCartItemQuantityRequest;
@@ -26,7 +27,7 @@ public class CartController {
     // GET /api/cart - 내 장바구니 조회
     @GetMapping
     public ResponseEntity<CartResponse> getMyCart() {
-        Long userId = 1L; // TODO: 인증 붙이면 토큰에서 꺼내기
+        Long userId = AuthContext.getCurrentUserId();
 
         Optional<CartResponse> cartOpt = cartService.getMyCart(userId);
         return cartOpt
@@ -40,7 +41,7 @@ public class CartController {
     public ResponseEntity<?> addItem(
             @RequestBody CartItemRequest request,
             @RequestParam(value = "force", defaultValue = "false") boolean force) {
-        Long userId = 1L;
+        Long userId = AuthContext.getCurrentUserId();
 
         try {
             CartResponse response = cartService.addItem(userId, request, force);
@@ -60,7 +61,7 @@ public class CartController {
             @PathVariable Long cartItemId,
             @RequestBody UpdateCartItemQuantityRequest request
     ) {
-        Long userId = 1L;
+        Long userId = AuthContext.getCurrentUserId();
 
         CartResponse response = cartService.updateItemQuantity(userId, cartItemId, request);
         return ResponseEntity.ok(response);
@@ -69,7 +70,7 @@ public class CartController {
     // DELETE /api/cart/items/{cartItemId} - 항목 삭제
     @DeleteMapping("/items/{cartItemId}")
     public ResponseEntity<CartResponse> deleteItem(@PathVariable Long cartItemId) {
-        Long userId = 1L;
+        Long userId = AuthContext.getCurrentUserId();
 
         CartResponse response = cartService.removeItem(userId, cartItemId);
         return ResponseEntity.ok(response);

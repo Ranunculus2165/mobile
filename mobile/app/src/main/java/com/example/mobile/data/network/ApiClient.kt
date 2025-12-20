@@ -1,5 +1,7 @@
 package com.example.mobile.data.network
 
+import com.example.mobile.data.auth.TokenManager
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -12,11 +14,25 @@ object ApiClient {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
+    // Authorization 헤더를 자동으로 추가하는 인터셉터
+    private val authInterceptor = Interceptor { chain ->
+        val token = TokenManager.getToken()
+        val request = if (token != null) {
+            chain.request().newBuilder()
+                .addHeader("Authorization", "Bearer $token")
+                .build()
+        } else {
+            chain.request()
+        }
+        chain.proceed(request)
+    }
+
     private val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .addInterceptor(loggingInterceptor)
+        .addInterceptor(authInterceptor)
         .build()
 
     private val retrofit: Retrofit = Retrofit.Builder()
@@ -29,4 +45,5 @@ object ApiClient {
     val myPageApi: MyPageApi = retrofit.create(MyPageApi::class.java)
     val cartApi: CartApi = retrofit.create(CartApi::class.java)
     val orderApi: OrderApi = retrofit.create(OrderApi::class.java)
+    val authApi: AuthApi = retrofit.create(AuthApi::class.java)
 }

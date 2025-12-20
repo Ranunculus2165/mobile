@@ -56,12 +56,11 @@ public class OrderService {
 
     /**
      * 주문 생성 (+ 결제 완료 상태로 바로 전환)
-     * - 지금은 userId = 1L 하드코딩 (마이페이지와 동일)
-     * - 모바일에서 cartId만 보내준다고 가정
+     * @param userId 사용자 ID (인증된 사용자)
+     * @param request 주문 요청 (cartId 포함)
      */
     @Transactional
-    public OrderResponse createOrder(OrderRequest request) {
-        Long userId = 1L; // TODO: OAuth 붙이면 토큰에서 꺼내기
+    public OrderResponse createOrder(Long userId, OrderRequest request) {
         Long cartId = request.getCartId();
 
         // 1) 카트 조회 + 소유자/상태 검증
@@ -169,10 +168,11 @@ public class OrderService {
 
     /**
      * 주문 상세 / 영수증 조회
+     * @param userId 사용자 ID (인증된 사용자)
+     * @param orderId 주문 ID
      */
     @Transactional(readOnly = true)
-    public OrderDetailResponse getOrderDetail(Long orderId) {
-        Long userId = 1L; // TODO: 인증 붙으면 토큰에서 꺼내기
+    public OrderDetailResponse getOrderDetail(Long userId, Long orderId) {
 
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다. id=" + orderId));
@@ -217,7 +217,7 @@ public class OrderService {
         UserEntity user = userRepository.findById(order.getUserId())
                 .orElse(null);
         String userName = (user != null) ? user.getName() : "";
-        String userPhone = (user != null) ? user.getEmail() : ""; // email을 전화번호로 사용
+        String userEmail = (user != null) ? user.getEmail() : "";
 
         // 영수증 플래그 조회
         String receiptFlag = (order.getReceiptFlag() != null) ? order.getReceiptFlag() : "";

@@ -125,6 +125,16 @@
             android:text="1대1 문의하기"
             android:textColor="#FFFFFF"
             android:backgroundTint="#03DAC5"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="로그아웃"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#FF5722"
             android:padding="12dp" />
     </LinearLayout>
 

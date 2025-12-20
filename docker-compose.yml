@@ -26,5 +26,21 @@ services:
       - wheats-mysql-data:/var/lib/mysql
     restart: always
 
+  # ⚠️ OAuth 서버는 나중에 OAuth 통합 시 사용 예정
+  # 현재는 JWT 기반 인증을 사용하므로 주석 처리
+  # oauth-server:
+  #   build:
+  #     context: .
+  #     dockerfile: docker/oauth-server/Dockerfile
+  #   container_name: wh-eats-oauth-server
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     FLASK_ENV: development
+  #     FLASK_APP: app.py
+  #   depends_on:
+  #     - db
+  #   restart: unless-stopped
+
 volumes:
   wheats-mysql-data:

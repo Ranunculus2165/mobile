@@ -25,3 +25,6 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql.BasicBinder: trace
+    # 매핑된 엔드포인트 확인용
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: INFO
+    com.wheats.api.auth: DEBUG

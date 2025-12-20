@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.mobile">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- 인터넷 권한 -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".WhEatsApplication"
         android:allowBackup="true"
         android:label="WH EATS"
         android:icon="@mipmap/ic_launcher"
@@ -67,6 +67,8 @@
         <!-- 1대1 문의 상세 -->
         <activity android:name=".ui.supportticket.SupportTicketDetailActivity" />
 
+        <!-- 로그인 화면 -->
+        <activity android:name=".ui.auth.LoginActivity" />
 
     </application>
 
