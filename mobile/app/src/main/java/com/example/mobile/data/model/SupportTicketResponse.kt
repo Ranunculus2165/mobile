@@ -7,6 +7,7 @@ package com.example.mobile.data.model
 data class SupportTicketResponse(
     val id: Long,
     val storeId: Long,
+    val storeName: String,
     val title: String,
     val message: String,
     val status: String,   // 서버에서는 enum(OPEN/ANSWERED/CLOSED)을 문자열로 내려온다고 가정

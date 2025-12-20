@@ -1,6 +1,8 @@
 package com.example.mobile.ui.mypage
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -8,6 +10,7 @@ import com.example.mobile.R
 import com.example.mobile.data.model.MyPageResponse
 import com.example.mobile.data.network.ApiClient
 import com.example.mobile.ui.base.BaseActivity
+import com.example.mobile.ui.supportticket.SupportTicketListActivity
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -29,6 +32,12 @@ class MyPageActivity : BaseActivity() {
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
+
+        // 문의하기 버튼 클릭 리스너
+        findViewById<Button>(R.id.btnInquiry).setOnClickListener {
+            val intent = Intent(this, SupportTicketListActivity::class.java)
+            startActivity(intent)
+        }
 
         loadMyPageData()
     }

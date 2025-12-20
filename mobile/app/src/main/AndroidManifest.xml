@@ -58,6 +58,15 @@
         <!-- 영수증 화면 -->
         <activity android:name=".ui.receipt.ReceiptActivity" />
 
+        <!-- 1대1 문의 목록 -->
+        <activity android:name=".ui.supportticket.SupportTicketListActivity" />
+
+        <!-- 1대1 문의 작성 -->
+        <activity android:name=".ui.supportticket.CreateSupportTicketActivity" />
+
+        <!-- 1대1 문의 상세 -->
+        <activity android:name=".ui.supportticket.SupportTicketDetailActivity" />
+
 
     </application>
 
