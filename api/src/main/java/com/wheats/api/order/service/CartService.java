@@ -7,6 +7,7 @@ import com.wheats.api.order.dto.UpdateCartItemQuantityRequest;
 import com.wheats.api.order.entity.CartEntity;
 import com.wheats.api.order.entity.CartItemEntity;
 import com.wheats.api.order.entity.CartStatus;
+import com.wheats.api.order.exception.CartConflictException;
 import com.wheats.api.order.repository.CartItemRepository;
 import com.wheats.api.order.repository.CartRepository;
 import com.wheats.api.store.entity.MenuEntity;
@@ -53,39 +54,78 @@ public class CartService {
     }
 
     @Transactional
-    public CartResponse addItem(Long userId, CartItemRequest request) {
+    public CartResponse addItem(Long userId, CartItemRequest request, boolean force) {
         Long storeId = request.getStoreId();
 
-        // 다른 가게의 ACTIVE 장바구니가 있으면 삭제
-        List<CartEntity> otherStoreCarts = cartRepository.findByUserIdAndStatus(userId, CartStatus.ACTIVE);
-        for (CartEntity otherCart : otherStoreCarts) {
-            if (!otherCart.getStoreId().equals(storeId)) {
-                // 다른 가게의 장바구니 아이템들 삭제
-                List<CartItemEntity> otherCartItems = cartItemRepository.findByCartId(otherCart.getId());
-                cartItemRepository.deleteAll(otherCartItems);
-                // 다른 가게의 장바구니 삭제
-                cartRepository.delete(otherCart);
+        // 1. 현재 사용자의 모든 ACTIVE 장바구니 조회
+        List<CartEntity> activeCarts = cartRepository.findByUserIdAndStatus(userId, CartStatus.ACTIVE);
+
+        CartEntity cart;
+
+        // 2. 다른 가게의 장바구니가 이미 있다면?
+        Optional<CartEntity> otherStoreCart = activeCarts.stream()
+                .filter(c -> !c.getStoreId().equals(storeId))
+                .findFirst();
+
+        if (otherStoreCart.isPresent()) {
+            if (!force) {
+                // force=false인 경우: 409 Conflict 예외 발생 (현재 장바구니 정보 포함)
+                CartEntity existingCart = otherStoreCart.get();
+                CartResponse existingCartResponse = buildCartResponse(existingCart);
+                throw new CartConflictException(existingCartResponse);
+            } else {
+                // force=true인 경우: 기존 장바구니를 ABANDONED로 변경 (아이템 유지)
+                CartEntity toAbandon = otherStoreCart.get();
+                toAbandon.setStatus(CartStatus.ABANDONED);
+                cartRepository.save(toAbandon);
+                cartRepository.flush(); // 즉시 반영
+
+                // 같은 가게의 ABANDONED 장바구니가 있으면 삭제 (유니크 제약조건 문제 방지)
+                Optional<CartEntity> abandonedCartOpt = cartRepository
+                        .findFirstByUserIdAndStoreIdAndStatusOrderByCreatedAtDesc(userId, storeId, CartStatus.ABANDONED);
+                if (abandonedCartOpt.isPresent()) {
+                    CartEntity abandonedCart = abandonedCartOpt.get();
+                    cartItemRepository.deleteAllByCartId(abandonedCart.getId());
+                    cartRepository.deleteById(abandonedCart.getId());
+                    cartRepository.flush();
+                }
+
+                // 새 장바구니 생성
+                cart = cartRepository.save(new CartEntity(userId, storeId, CartStatus.ACTIVE));
             }
+        } else {
+            // 3. 같은 가게의 장바구니가 있다면 그대로 사용, 없으면 생성
+            cart = activeCarts.stream()
+                    .filter(c -> c.getStoreId().equals(storeId))
+                    .findFirst()
+                    .orElseGet(() -> {
+                        // 같은 가게의 ABANDONED 장바구니가 있으면 먼저 삭제 (유니크 제약조건 문제 방지)
+                        Optional<CartEntity> abandonedCartOpt = cartRepository
+                                .findFirstByUserIdAndStoreIdAndStatusOrderByCreatedAtDesc(userId, storeId, CartStatus.ABANDONED);
+                        if (abandonedCartOpt.isPresent()) {
+                            CartEntity abandonedCart = abandonedCartOpt.get();
+                            cartItemRepository.deleteAllByCartId(abandonedCart.getId());
+                            cartRepository.deleteById(abandonedCart.getId());
+                            cartRepository.flush();
+                        }
+                        return cartRepository.save(new CartEntity(userId, storeId, CartStatus.ACTIVE));
+                    });
         }
 
-        // user + store 기준 ACTIVE 장바구니 조회 (없으면 새로 생성)
-        CartEntity cart = cartRepository
-                .findFirstByUserIdAndStoreIdAndStatusOrderByCreatedAtDesc(userId, storeId, CartStatus.ACTIVE)
-                .orElseGet(() -> cartRepository.save(new CartEntity(userId, storeId, CartStatus.ACTIVE)));
-
-        // 같은 메뉴가 이미 있으면 수량만 증가
-        Optional<CartItemEntity> existed =
-                cartItemRepository.findByCartIdAndMenuId(cart.getId(), request.getMenuId());
+        // 4. 메뉴 추가 로직
+        Optional<CartItemEntity> existed = cartItemRepository.findByCartIdAndMenuId(cart.getId(), request.getMenuId());
 
         if (existed.isPresent()) {
             CartItemEntity item = existed.get();
             item.setQuantity(item.getQuantity() + request.getQuantity());
             cartItemRepository.save(item);
         } else {
-            CartItemEntity newItem =
-                    new CartItemEntity(cart.getId(), request.getMenuId(), request.getQuantity());
+            CartItemEntity newItem = new CartItemEntity(cart.getId(), request.getMenuId(), request.getQuantity());
             cartItemRepository.save(newItem);
         }
+
+        // 5. 최종 응답 빌드 전 영속성 반영
+        cartItemRepository.flush();
 
         return buildCartResponse(cart);
     }

@@ -19,7 +19,8 @@ interface CartApi {
     // 장바구니에 메뉴 추가
     @POST("api/cart/items")
     suspend fun addItemToCart(
-        @Body request: CartItemRequest
+        @Body request: CartItemRequest,
+        @retrofit2.http.Query("force") force: Boolean = false
     ): CartResponse
 
     // 장바구니 아이템 수량 수정

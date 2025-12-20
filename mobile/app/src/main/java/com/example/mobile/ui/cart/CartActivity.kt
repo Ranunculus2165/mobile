@@ -65,6 +65,12 @@ class CartActivity : BaseActivity() {
         loadCart()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // 화면이 다시 보일 때 장바구니 새로고침 (다른 화면에서 장바구니 변경 시 반영)
+        loadCart()
+    }
+
     private fun loadCart() {
         lifecycleScope.launch {
             try {

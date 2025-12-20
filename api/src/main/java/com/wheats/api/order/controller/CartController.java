@@ -3,10 +3,14 @@ package com.wheats.api.order.controller;
 import com.wheats.api.order.dto.CartItemRequest;
 import com.wheats.api.order.dto.CartResponse;
 import com.wheats.api.order.dto.UpdateCartItemQuantityRequest;
+import com.wheats.api.order.exception.CartConflictException;
 import com.wheats.api.order.service.CartService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -31,12 +35,23 @@ public class CartController {
     }
 
     // POST /api/cart/items - 장바구니 담기
+    // 쿼리 파라미터: force=true일 경우 다른 가게 장바구니가 있어도 강제로 새 장바구니 생성
     @PostMapping("/items")
-    public ResponseEntity<CartResponse> addItem(@RequestBody CartItemRequest request) {
+    public ResponseEntity<?> addItem(
+            @RequestBody CartItemRequest request,
+            @RequestParam(value = "force", defaultValue = "false") boolean force) {
         Long userId = 1L;
 
-        CartResponse response = cartService.addItem(userId, request);
-        return ResponseEntity.ok(response);
+        try {
+            CartResponse response = cartService.addItem(userId, request, force);
+            return ResponseEntity.ok(response);
+        } catch (CartConflictException e) {
+            // 409 Conflict: 다른 가게의 장바구니가 존재할 때 현재 장바구니 정보와 함께 반환
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", e.getReason());
+            errorResponse.put("existingCart", e.getExistingCart());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        }
     }
 
     // PATCH /api/cart/items/{cartItemId} - 수량 변경

@@ -1,5 +1,6 @@
 package com.example.mobile.ui.storedetail
 
+import android.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,9 +10,13 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
+import com.example.mobile.data.model.CartResponse
 import com.example.mobile.data.model.MenuItem
 import com.example.mobile.data.network.ApiClient
+import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MenuAdapter(
     private val storeId: Long,
@@ -61,7 +66,7 @@ class MenuAdapter(
             }
         }
 
-        private fun addToCart(item: MenuItem) {
+        private fun addToCart(item: MenuItem, force: Boolean = false) {
             lifecycleScope.launch {
                 try {
                     val request = com.example.mobile.data.model.CartItemRequest(
@@ -70,13 +75,22 @@ class MenuAdapter(
                         quantity = 1
                     )
                     android.util.Log.d("MenuAdapter", "=== 장바구니 추가 요청 시작 ===")
-                    android.util.Log.d("MenuAdapter", "요청 데이터: storeId=$storeId, menuId=${item.id}, menuName=${item.name}, quantity=1")
+                    android.util.Log.d("MenuAdapter", "요청 데이터: storeId=$storeId, menuId=${item.id}, menuName=${item.name}, quantity=1, force=$force")
                     android.util.Log.d("MenuAdapter", "요청 JSON: ${com.google.gson.Gson().toJson(request)}")
                     
-                    val response = ApiClient.cartApi.addItemToCart(request)
+                    val response = ApiClient.cartApi.addItemToCart(request, force)
                     android.util.Log.d("MenuAdapter", "장바구니 추가 성공: $response")
-                    // 장바구니 업데이트 콜백 호출
-                    onCartUpdated?.invoke()
+                    
+                    // 메인 스레드에서 Toast 표시 및 콜백 호출
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            itemView.context,
+                            "장바구니에 추가되었습니다",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        // 장바구니 업데이트 콜백 호출
+                        onCartUpdated?.invoke()
+                    }
                 } catch (e: retrofit2.HttpException) {
                     // HTTP 에러 응답 처리
                     val errorBody = try {
@@ -90,18 +104,72 @@ class MenuAdapter(
                     android.util.Log.e("MenuAdapter", "요청 URL: ${e.response()?.raw()?.request?.url}")
                     android.util.Log.e("MenuAdapter", "스택 트레이스:", e)
                     
-                    val errorMessage = when (e.code()) {
-                        500 -> "서버 내부 오류가 발생했습니다. 서버 로그를 확인해주세요.\n에러: $errorBody"
-                        404 -> "요청한 리소스를 찾을 수 없습니다."
-                        400 -> "잘못된 요청입니다: $errorBody"
-                        else -> "서버 오류 (${e.code()}): $errorBody"
+                    when (e.code()) {
+                        409 -> {
+                            // 409 Conflict: 다른 가게의 장바구니가 존재할 때 팝업 표시
+                            try {
+                                val gson = Gson()
+                                val errorJson = gson.fromJson(errorBody, Map::class.java) as? Map<*, *>
+                                val existingCartJson = errorJson?.get("existingCart") as? Map<*, *>
+                                
+                                if (existingCartJson != null) {
+                                    val existingCart = gson.fromJson(
+                                        gson.toJson(existingCartJson),
+                                        CartResponse::class.java
+                                    )
+                                    // 메인 스레드에서 다이얼로그 표시
+                                    withContext(Dispatchers.Main) {
+                                        showCartConflictDialog(item, existingCart)
+                                    }
+                                } else {
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(
+                                            itemView.context,
+                                            "다른 가게의 장바구니가 이미 존재합니다.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                            } catch (ex: Exception) {
+                                android.util.Log.e("MenuAdapter", "409 에러 파싱 실패", ex)
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(
+                                        itemView.context,
+                                        "다른 가게의 장바구니가 이미 존재합니다.",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        }
+                        500 -> {
+                            Toast.makeText(
+                                itemView.context,
+                                "서버 내부 오류가 발생했습니다. 서버 로그를 확인해주세요.\n에러: $errorBody",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        404 -> {
+                            Toast.makeText(
+                                itemView.context,
+                                "요청한 리소스를 찾을 수 없습니다.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        400 -> {
+                            Toast.makeText(
+                                itemView.context,
+                                "잘못된 요청입니다: $errorBody",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        else -> {
+                            Toast.makeText(
+                                itemView.context,
+                                "서버 오류 (${e.code()}): $errorBody",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
-                    
-                    Toast.makeText(
-                        itemView.context,
-                        errorMessage,
-                        Toast.LENGTH_LONG
-                    ).show()
                 } catch (e: java.net.SocketTimeoutException) {
                     android.util.Log.e("MenuAdapter", "타임아웃 오류", e)
                     Toast.makeText(
@@ -126,6 +194,25 @@ class MenuAdapter(
                     ).show()
                 }
             }
+        }
+
+        private fun showCartConflictDialog(item: MenuItem, existingCart: CartResponse) {
+            AlertDialog.Builder(itemView.context)
+                .setTitle("장바구니 변경")
+                .setMessage(
+                    "${existingCart.storeName}의 장바구니에 ${existingCart.items.size}개의 상품이 담겨있습니다.\n" +
+                            "기존 장바구니를 비우고 새로운 장바구니를 생성하시겠습니까?"
+                )
+                .setPositiveButton("확인") { _, _ ->
+                    // 사용자가 수락하면 force=true로 재호출
+                    addToCart(item, force = true)
+                }
+                .setNegativeButton("취소") { dialog, _ ->
+                    // 사용자가 거부하면 화면에 머무름 (아무 동작 없음)
+                    dialog.dismiss()
+                }
+                .setCancelable(true)
+                .show()
         }
     }
 }

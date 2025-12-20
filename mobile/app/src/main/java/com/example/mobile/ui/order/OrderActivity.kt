@@ -14,6 +14,7 @@ import com.example.mobile.R
 import com.example.mobile.data.model.CartResponse
 import com.example.mobile.data.network.ApiClient
 import com.example.mobile.ui.base.BaseActivity
+import com.example.mobile.ui.storelist.StoreListActivity
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
 
@@ -143,7 +144,10 @@ class OrderActivity : BaseActivity() {
                         Toast.LENGTH_SHORT
                     ).show()
 
-                    // 주문 완료 후 장바구니 화면으로 돌아가기
+                    // 주문 완료 후 홈 화면으로 이동
+                    val intent = Intent(this@OrderActivity, StoreListActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                    startActivity(intent)
                     finish()
 
                 } catch (e: retrofit2.HttpException) {
