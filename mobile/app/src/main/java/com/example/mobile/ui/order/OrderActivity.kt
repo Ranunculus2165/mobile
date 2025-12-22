@@ -19,6 +19,8 @@ import com.google.gson.Gson
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.async
 
 class OrderActivity : BaseActivity() {
 
@@ -39,7 +41,7 @@ class OrderActivity : BaseActivity() {
     private lateinit var orderAdapter: OrderItemAdapter
 
     private var cart: CartResponse? = null
-    private var deliveryFee: Int = 3000 // 더미 배달료
+    private var deliveryFee: Int = 0 // 더미 배달료
     private var availablePoint: Int = 0 // 보유 포인트
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,10 +90,20 @@ class OrderActivity : BaseActivity() {
     private fun loadUserPointAndSetupOrder() {
         lifecycleScope.launch {
             try {
-                // 회원 정보에서 포인트 가져오기 (IO 스레드에서 실행)
-                val myPageResponse = withContext(Dispatchers.IO) {
-                    ApiClient.myPageApi.getMyPage().execute().body()
+                // 회원 정보와 가게 정보를 병렬로 가져오기
+                val (myPageResponse, storeDetail) = withContext(Dispatchers.IO) {
+                    coroutineScope {
+                        val myPageDeferred = async {
+                            ApiClient.myPageApi.getMyPage().execute().body()
+                        }
+                        val storeDeferred = async {
+                            cart?.let { ApiClient.storeApi.getStoreDetail(it.storeId) }
+                        }
+                        Pair(myPageDeferred.await(), storeDeferred.await())
+                    }
                 }
+
+                // 포인트 정보 설정
                 if (myPageResponse != null) {
                     availablePoint = myPageResponse.point
                 } else {
@@ -104,11 +116,19 @@ class OrderActivity : BaseActivity() {
                     finish()
                     return@launch
                 }
+
+                // 배달료 정보 설정
+                if (storeDetail != null) {
+                    deliveryFee = storeDetail.store.deliveryTip
+                } else {
+                    Log.e("OrderActivity", "가게 정보를 불러올 수 없습니다")
+                    deliveryFee = 0 // 기본값
+                }
             } catch (e: Exception) {
-                Log.e("OrderActivity", "포인트 조회 실패", e)
+                Log.e("OrderActivity", "정보 조회 실패", e)
                 Toast.makeText(
                     this@OrderActivity,
-                    "포인트 정보를 불러오는데 실패했습니다",
+                    "정보를 불러오는데 실패했습니다",
                     Toast.LENGTH_SHORT
                 ).show()
                 finish()
