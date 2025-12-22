@@ -12,6 +12,7 @@ import com.example.mobile.data.model.MyPageResponse
 import com.example.mobile.data.network.ApiClient
 import com.example.mobile.ui.auth.LoginActivity
 import com.example.mobile.ui.base.BaseActivity
+import com.example.mobile.ui.orderhistory.OrderHistoryActivity
 import com.example.mobile.ui.supportticket.SupportTicketListActivity
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
@@ -44,6 +45,12 @@ class MyPageActivity : BaseActivity() {
         // 로그아웃 버튼 클릭 리스너
         findViewById<Button>(R.id.btnLogout).setOnClickListener {
             logout()
+        }
+
+        // 전체 주문 내역 보기 버튼 클릭 리스너
+        findViewById<Button>(R.id.btnViewAllOrders).setOnClickListener {
+            val intent = Intent(this, OrderHistoryActivity::class.java)
+            startActivity(intent)
         }
 
         loadMyPageData()

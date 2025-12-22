@@ -52,4 +52,11 @@ interface MyPageApi {
     fun createSupportTicket(
         @Body body: CreateSupportTicketRequest
     ): Call<SupportTicketResponse>
+
+    /**
+     * 전체 주문 내역 조회
+     * GET /api/users/me/orders
+     */
+    @GET("/api/users/me/orders")
+    fun getAllOrderHistory(): Call<List<com.example.mobile.data.model.OrderHistoryItem>>
 }

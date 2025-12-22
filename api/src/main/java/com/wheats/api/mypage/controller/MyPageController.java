@@ -3,9 +3,12 @@ package com.wheats.api.mypage.controller;
 import com.wheats.api.auth.util.AuthContext;
 import com.wheats.api.mypage.dto.MyPageProfileResponse;
 import com.wheats.api.mypage.dto.MyPageResponse;
+import com.wheats.api.mypage.dto.OrderHistoryItemResponse;
 import com.wheats.api.mypage.service.MyPageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -37,6 +40,18 @@ public class MyPageController {
         Long userId = AuthContext.getCurrentUserId();
 
         MyPageResponse response = myPageService.getMyPage(userId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 전체 주문 내역 조회
+     * GET /api/users/me/orders
+     */
+    @GetMapping("/me/orders")
+    public ResponseEntity<List<OrderHistoryItemResponse>> getAllOrderHistory() {
+        Long userId = AuthContext.getCurrentUserId();
+
+        List<OrderHistoryItemResponse> response = myPageService.getAllOrderHistory(userId);
         return ResponseEntity.ok(response);
     }
 }

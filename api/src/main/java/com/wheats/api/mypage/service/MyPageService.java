@@ -123,6 +123,40 @@ public class MyPageService {
     }
 
     /**
+     * 전체 주문 내역 조회 (제한 없음)
+     */
+    @Transactional(readOnly = true)
+    public List<OrderHistoryItemResponse> getAllOrderHistory(Long userId) {
+        List<OrderEntity> orders = orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        List<OrderHistoryItemResponse> orderHistory = new ArrayList<>();
+
+        for (OrderEntity order : orders) {
+            // 가게 정보 조회
+            StoreEntity store = storeRepository.findById(order.getStoreId())
+                    .orElse(null);
+            String storeName = (store != null) ? store.getName() : "(삭제된 가게)";
+
+            // 주문 아이템 조회하여 상품 설명 생성
+            List<OrderItemEntity> orderItems = orderItemRepository.findByOrderId(order.getId());
+            String itemDescription = buildItemDescription(orderItems);
+
+            // 주문 상태를 한글로 변환
+            String status = convertOrderStatusToKorean(order.getStatus());
+
+            orderHistory.add(new OrderHistoryItemResponse(
+                    order.getId(),
+                    storeName,
+                    itemDescription,
+                    order.getCreatedAt(),
+                    order.getTotalPrice(),
+                    status
+            ));
+        }
+
+        return orderHistory;
+    }
+
+    /**
      * 주문 상태를 한글로 변환
      */
     private String convertOrderStatusToKorean(OrderStatus status) {
