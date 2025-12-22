@@ -59,6 +59,10 @@ class MyPageActivity : BaseActivity() {
                 // 사용자 정보 표시
                 findViewById<android.widget.TextView>(R.id.tvUserName).text = response.name
                 findViewById<android.widget.TextView>(R.id.tvUserPhone).text = response.email
+                
+                // 포인트 정보 표시 (천 단위 구분 기호 포함)
+                val pointText = String.format("%,dP", response.point)
+                findViewById<android.widget.TextView>(R.id.tvUserPoint).text = pointText
 
                 // 주문 내역 표시
                 adapter.submitList(response.orderHistory)

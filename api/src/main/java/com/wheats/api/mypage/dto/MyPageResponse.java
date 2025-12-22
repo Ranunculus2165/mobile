@@ -9,11 +9,13 @@ public class MyPageResponse {
 
     private String name;
     private String email;
+    private Integer point;
     private List<OrderHistoryItemResponse> orderHistory;
 
-    public MyPageResponse(String name, String email, List<OrderHistoryItemResponse> orderHistory) {
+    public MyPageResponse(String name, String email, Integer point, List<OrderHistoryItemResponse> orderHistory) {
         this.name = name;
         this.email = email;
+        this.point = point;
         this.orderHistory = orderHistory;
     }
 
@@ -23,6 +25,10 @@ public class MyPageResponse {
 
     public String getEmail() {
         return email;
+    }
+
+    public Integer getPoint() {
+        return point;
     }
 
     public List<OrderHistoryItemResponse> getOrderHistory() {

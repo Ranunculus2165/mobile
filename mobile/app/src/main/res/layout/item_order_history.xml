@@ -79,13 +79,14 @@
         android:textSize="12sp"
         android:textColor="#666666"
         android:backgroundTint="#FFFFFF"
+        android:drawableStart="@android:drawable/ic_menu_sort_by_size"
         android:drawablePadding="4dp"
         android:paddingHorizontal="8dp"
         android:paddingVertical="4dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/tvOrderDate"
-        app:layout_constraintStart_toStartOf="@id/tvStoreName"
-        app:layout_constraintEnd_toEndOf="@id/tvStoreName" />
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toBottomOf="@id/tvStatus"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- 구분선 -->
     <View

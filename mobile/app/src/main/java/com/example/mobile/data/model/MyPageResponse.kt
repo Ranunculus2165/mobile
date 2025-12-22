@@ -3,6 +3,7 @@ package com.example.mobile.data.model
 data class MyPageResponse(
     val name: String,
     val email: String,
+    val point: Int,
     val orderHistory: List<OrderHistoryItem>
 )
 

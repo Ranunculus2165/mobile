@@ -94,6 +94,7 @@ public class MyPageService {
         return new MyPageResponse(
                 user.getName(),
                 user.getEmail(),
+                user.getPoint(),
                 orderHistory
         );
     }
