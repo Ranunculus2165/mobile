@@ -51,96 +51,99 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- 배달 주소 -->
+            <!-- 가게 정보 (회색 배경) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="16dp"
-                android:background="@android:color/white"
-                android:elevation="2dp"
-                android:layout_marginBottom="12dp">
+                android:padding="12dp"
+                android:background="#F5F5F5"
+                android:layout_marginBottom="0dp">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_mylocation"
-                    android:tint="#20B2AA" />
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@android:drawable/ic_menu_myplaces"
+                    android:tint="#666666" />
 
                 <TextView
-                    android:id="@+id/tvOrderDeliveryAddress"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="서울시 강남구 테헤란로 123, 101호"
-                    android:textSize="14sp"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp" />
-
-                <TextView
-                    android:id="@+id/btnChangeAddress"
+                    android:id="@+id/tvOrderStoreName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="변경"
-                    android:textColor="#20B2AA"
-                    android:textSize="14sp"
+                    android:text="피자헛 서초점"
+                    android:textSize="16sp"
                     android:textStyle="bold"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:padding="8dp" />
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@android:drawable/ic_menu_more"
-                    android:tint="#20B2AA" />
+                    android:textColor="#333333"
+                    android:layout_marginStart="8dp" />
 
             </LinearLayout>
 
-            <!-- 결제 수단 -->
+            <!-- 주문 상품 -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvOrderItems"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="12dp"
+                android:layout_marginBottom="0dp" />
+
+            <!-- 구분선 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginVertical="16dp" />
+
+            <!-- 결제 수단 (회색 배경) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:padding="16dp"
-                android:background="@android:color/white"
-                android:elevation="2dp"
-                android:layout_marginBottom="12dp">
+                android:padding="12dp"
+                android:background="#F5F5F5"
+                android:layout_marginBottom="0dp">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@android:drawable/ic_menu_myplaces"
-                    android:tint="#20B2AA" />
+                    android:tint="#666666" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="결제 수단"
+                    android:textSize="14sp"
+                    android:textColor="#666666"
+                    android:layout_marginStart="8dp" />
 
                 <TextView
                     android:id="@+id/tvOrderPaymentMethod"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:text="포인트"
                     android:textSize="14sp"
-                    android:paddingStart="12dp" />
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@android:drawable/ic_menu_more"
-                    android:tint="#CCCCCC" />
+                    android:textColor="#333333" />
 
             </LinearLayout>
 
-            <!-- 요청사항 -->
+            <!-- 구분선 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginVertical="16dp" />
+
+            <!-- 요청사항 (회색 배경) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp"
-                android:background="@android:color/white"
-                android:elevation="2dp"
-                android:layout_marginBottom="12dp">
+                android:padding="12dp"
+                android:background="#F5F5F5"
+                android:layout_marginBottom="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -150,10 +153,10 @@
                     android:layout_marginBottom="8dp">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
                         android:src="@android:drawable/ic_menu_recent_history"
-                        android:tint="#20B2AA" />
+                        android:tint="#666666" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -161,8 +164,8 @@
                         android:layout_weight="1"
                         android:text="요청사항"
                         android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:paddingStart="12dp" />
+                        android:textColor="#666666"
+                        android:layout_marginStart="8dp" />
 
                 </LinearLayout>
 
@@ -179,22 +182,12 @@
 
             </LinearLayout>
 
-            <!-- 주문 상품 -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="주문 상품"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvOrderItems"
+            <!-- 구분선 -->
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@android:color/white"
-                android:elevation="2dp"
-                android:padding="8dp" />
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginTop="16dp" />
 
         </LinearLayout>
 
@@ -213,69 +206,68 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- 잔여 포인트 -->
+        <!-- 결제 정보 -->
         <TextView
-            android:id="@+id/tvOrderRemainingPoint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="잔여 포인트: 50,000원"
-            android:textSize="14sp"
-            android:textColor="#666666"
-            android:layout_marginBottom="12dp" />
+            android:text="결제 정보"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
 
-        <!-- 결제 정보 -->
+        <!-- 주문 금액 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="4dp">
+            android:layout_marginBottom="8dp">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="주문 금액"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:textColor="#333333" />
 
             <TextView
                 android:id="@+id/tvOrderAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0원"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:textColor="#333333" />
 
         </LinearLayout>
 
+        <!-- 배달료 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="8dp">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="배달료"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:textColor="#333333" />
 
             <TextView
                 android:id="@+id/tvOrderDeliveryFee"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0원"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:textColor="#333333" />
 
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#E0E0E0"
-            android:layout_marginBottom="12dp" />
-
+        <!-- 총 결제 금액 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -288,16 +280,74 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="총 결제 금액"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textSize="14sp"
+                android:textColor="#333333" />
 
             <TextView
                 android:id="@+id/tvOrderTotalPrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="0원"
-                android:textSize="18sp"
-                android:textStyle="bold"
+                android:text="- 0P"
+                android:textSize="14sp"
+                android:textColor="#333333" />
+
+        </LinearLayout>
+
+        <!-- 구분선 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="16dp" />
+
+        <!-- 보유 포인트 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="보유 포인트"
+                android:textSize="14sp"
+                android:textColor="#333333" />
+
+            <TextView
+                android:id="@+id/tvAvailablePoint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+ 0P"
+                android:textSize="14sp"
+                android:textColor="#333333" />
+
+        </LinearLayout>
+
+        <!-- 잔여 포인트 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="잔여 포인트"
+                android:textSize="14sp"
+                android:textColor="#333333" />
+
+            <TextView
+                android:id="@+id/tvOrderRemainingPoint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0P"
+                android:textSize="14sp"
                 android:textColor="#20B2AA" />
 
         </LinearLayout>

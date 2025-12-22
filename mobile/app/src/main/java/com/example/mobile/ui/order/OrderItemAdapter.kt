@@ -37,7 +37,7 @@ class OrderItemAdapter : RecyclerView.Adapter<OrderItemAdapter.OrderItemViewHold
 
         fun bind(item: CartItemResponse) {
             tvMenuName.text = item.menuName
-            tvQuantity.text = "x ${item.quantity}"
+            tvQuantity.text = "x${item.quantity}"
             tvPrice.text = String.format("%,d원", item.linePrice)
         }
     }

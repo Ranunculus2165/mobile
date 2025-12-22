@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:padding="12dp">
+    android:paddingVertical="8dp">
 
     <TextView
         android:id="@+id/tvOrderItemName"
@@ -12,13 +12,14 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="메뉴 이름"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        android:textColor="#333333" />
 
     <TextView
         android:id="@+id/tvOrderItemQuantity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="x 1"
+        android:text="x1"
         android:textSize="14sp"
         android:textColor="#666666"
         android:layout_marginEnd="12dp" />
@@ -27,9 +28,9 @@
         android:id="@+id/tvOrderItemPrice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="9,000원"
+        android:text="22,000원"
         android:textSize="14sp"
-        android:textStyle="bold" />
+        android:textColor="#333333" />
 
 </LinearLayout>
 
