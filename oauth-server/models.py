@@ -82,6 +82,12 @@ class OAuth2AuthorizationCode(db.Model):
     def is_expired(self):
         return int(time.time()) >= self.expires_at
 
+    def get_redirect_uri(self):
+        return self.redirect_uri
+
+    def get_scope(self):
+        return self.scope or ''
+
     def __repr__(self):
         return f'<OAuth2AuthorizationCode {self.code}>'
 

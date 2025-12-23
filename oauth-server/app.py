@@ -130,14 +130,18 @@ def oauth_login():
         user = User.query.filter_by(username=username).first()
 
         if user and user.check_password(password):
+            # 세션에 사용자 ID 저장
             session['user_id'] = user.id
             # Redirect back to authorize endpoint with original query params
             from urllib.parse import urlencode
             next_url = request.args.get('next', '/oauth/authorize')
             if request.args:
                 # Preserve original OAuth parameters
-                return f'<script>window.location.href="{next_url}?" + window.location.search.substring(1);</script>'
-            return redirect(next_url)
+                params = {k: v for k, v in request.args.items() if k != 'next'}
+                if params:
+                    params_str = '&'.join([f'{k}={v}' for k, v in params.items()])
+                    return f'<script>window.location.href="{next_url}?{params_str}";</script>'
+            return f'<script>window.location.href="{next_url}";</script>'
         else:
             return render_template_string(LOGIN_TEMPLATE, error='Invalid username or password')
 
