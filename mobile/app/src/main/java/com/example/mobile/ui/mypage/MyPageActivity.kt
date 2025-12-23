@@ -7,7 +7,7 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
-import com.example.mobile.data.auth.TokenManager
+import com.example.mobile.data.auth.AuthStateManager
 import com.example.mobile.data.model.MyPageResponse
 import com.example.mobile.data.network.ApiClient
 import com.example.mobile.ui.auth.LoginActivity
@@ -86,8 +86,9 @@ class MyPageActivity : BaseActivity() {
     }
 
     private fun logout() {
-        // 토큰 삭제
-        TokenManager.clearToken()
+        // OAuth 인증 상태 삭제
+        val authStateManager = AuthStateManager.getInstance(this)
+        authStateManager.clear()
 
         // 로그인 화면으로 이동
         val intent = Intent(this, LoginActivity::class.java)
