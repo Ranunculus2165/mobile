@@ -38,9 +38,12 @@ class AuthStateManager private constructor(context: Context) {
         private set(value) {
             synchronized(lock) {
                 val stateJson = value.jsonSerializeString()
+                Log.d(TAG, "Saving AuthState to SharedPreferences")
+                Log.d(TAG, "  JSON length: ${stateJson.length}")
                 prefs.edit()
                     .putString(KEY_STATE, stateJson)
-                    .apply()
+                    .commit()  // apply() 대신 commit() 사용 (동기 저장)
+                Log.d(TAG, "AuthState saved successfully")
             }
         }
 
@@ -75,9 +78,16 @@ class AuthStateManager private constructor(context: Context) {
         ex: net.openid.appauth.AuthorizationException?
     ) {
         synchronized(lock) {
+            Log.d(TAG, "updateAfterTokenResponse called")
             val state = current
             state.update(response, ex)
             current = state
+            
+            // 저장 후 확인
+            Log.d(TAG, "After update:")
+            Log.d(TAG, "  isAuthorized: ${state.isAuthorized}")
+            Log.d(TAG, "  accessToken: ${state.accessToken?.take(10)}...")
+            Log.d(TAG, "  accessTokenExpirationTime: ${state.accessTokenExpirationTime}")
         }
     }
 

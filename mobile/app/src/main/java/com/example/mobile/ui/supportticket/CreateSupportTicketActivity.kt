@@ -2,15 +2,15 @@ package com.example.mobile.ui.supportticket
 
 import android.os.Bundle
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
 import com.example.mobile.R
 import com.example.mobile.data.model.CreateSupportTicketRequest
 import com.example.mobile.data.model.Store
 import com.example.mobile.data.network.ApiClient
+import com.example.mobile.ui.base.BaseActivity
 import kotlinx.coroutines.*
 import java.util.*
 
-class CreateSupportTicketActivity : AppCompatActivity() {
+class CreateSupportTicketActivity : BaseActivity() {
 
     private lateinit var spinnerStore: Spinner
     private lateinit var etTitle: EditText

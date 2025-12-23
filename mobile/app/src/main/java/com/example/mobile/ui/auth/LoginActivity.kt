@@ -40,11 +40,41 @@ class LoginActivity : AppCompatActivity() {
         authService = AuthorizationService(this, appAuthConfig)
         authStateManager = AuthStateManager.getInstance(this)
 
-        // 이미 로그인된 경우 메인 화면으로 이동
-        if (authStateManager.current.isAuthorized) {
-            Log.d(TAG, "Already logged in, navigating to store list")
-            navigateToStoreList()
-            return
+        // 토큰 유효성 확인 후 메인 화면으로 이동
+        val authState = authStateManager.current
+        val accessToken = authState.accessToken
+        val expirationTime = authState.accessTokenExpirationTime
+        
+        Log.d(TAG, "Checking auth state:")
+        Log.d(TAG, "  isAuthorized: ${authState.isAuthorized}")
+        Log.d(TAG, "  accessToken: ${if (accessToken != null) "${accessToken.take(10)}..." else "null"}")
+        Log.d(TAG, "  expirationTime: $expirationTime")
+        
+        // 토큰이 존재하고 유효한지 엄격하게 확인
+        // accessTokenExpirationTime은 밀리초 단위이므로 밀리초로 비교
+        if (accessToken != null && expirationTime != null) {
+            val currentTimeMs = System.currentTimeMillis()
+            val timeUntilExpirySeconds = (expirationTime - currentTimeMs) / 1000
+            val isExpired = expirationTime <= currentTimeMs
+            
+            Log.d(TAG, "  currentTime: $currentTimeMs (ms)")
+            Log.d(TAG, "  timeUntilExpiry: $timeUntilExpirySeconds seconds")
+            Log.d(TAG, "  isExpired: $isExpired")
+            
+            // 토큰이 유효하고 만료되지 않았는지 확인 (최소 60초 여유)
+            if (!isExpired && timeUntilExpirySeconds > 60) {
+                Log.d(TAG, "Valid token found, navigating to store list")
+                navigateToStoreList()
+                return
+            } else {
+                Log.w(TAG, "Token expired or expiring soon. Clearing token and requiring re-login")
+                Log.w(TAG, "  Expiration: $expirationTime (ms), Current: $currentTimeMs (ms), Time until expiry: $timeUntilExpirySeconds seconds")
+                authStateManager.clear()
+            }
+        } else {
+            Log.w(TAG, "Token missing or invalid (accessToken: ${accessToken != null}, expirationTime: ${expirationTime != null})")
+            Log.w(TAG, "Clearing invalid token and requiring re-login")
+            authStateManager.clear()
         }
 
         setupUI()
@@ -54,11 +84,11 @@ class LoginActivity : AppCompatActivity() {
         // WhiteHat 로그인 버튼 클릭 시 Customer + Profile scope로 로그인
         // Profile scope는 OAuth 서버의 /api/me 엔드포인트 접근에 필요
         findViewById<Button>(R.id.btnLoginCustomer).setOnClickListener {
-            startOAuthLogin("${OAuthConfig.SCOPE_CUSTOMER} ${OAuthConfig.SCOPE_PROFILE}")
+            startOAuthLogin("${OAuthConfig.SCOPE_CUSTOMER} ${OAuthConfig.SCOPE_PROFILE}", forceLogin = true)
         }
     }
 
-    private fun startOAuthLogin(scope: String) {
+    private fun startOAuthLogin(scope: String, forceLogin: Boolean = false) {
         val serviceConfig = AuthorizationServiceConfiguration(
             Uri.parse(OAuthConfig.AUTHORIZATION_ENDPOINT),
             Uri.parse(OAuthConfig.TOKEN_ENDPOINT)
@@ -70,6 +100,11 @@ class LoginActivity : AppCompatActivity() {
             ResponseTypeValues.CODE,
             Uri.parse(OAuthConfig.REDIRECT_URI)
         ).setScope(scope)
+
+        // forceLogin이 true면 setPrompt("login")을 사용하여 강제 로그인
+        if (forceLogin) {
+            authRequestBuilder.setPrompt("login")
+        }
 
         // PKCE 활성화
         val authRequest = authRequestBuilder.build()
@@ -107,11 +142,27 @@ class LoginActivity : AppCompatActivity() {
                     Log.d(TAG, "Access Token: ${tokenResponse.accessToken}")
                     Log.d(TAG, "Refresh Token: ${tokenResponse.refreshToken}")
                     Log.d(TAG, "Scope: ${tokenResponse.scope}")
+                    val expiresAtMs = tokenResponse.accessTokenExpirationTime
+                    val expiresInSeconds = expiresAtMs?.let { (it - System.currentTimeMillis()) / 1000 }
+                    Log.d(TAG, "Expires At: $expiresAtMs (ms)")
+                    Log.d(TAG, "Expires In: $expiresInSeconds seconds")
 
                     // AuthState 저장
                     authStateManager.updateAfterTokenResponse(tokenResponse, exception)
+                    
+                    // 저장 후 확인
+                    val savedState = authStateManager.current
+                    Log.d(TAG, "Saved AuthState:")
+                    Log.d(TAG, "  isAuthorized: ${savedState.isAuthorized}")
+                    Log.d(TAG, "  accessToken: ${savedState.accessToken?.take(10)}...")
+                    val savedExpiresAtMs = savedState.accessTokenExpirationTime
+                    val savedExpiresInSeconds = savedExpiresAtMs?.let { (it - System.currentTimeMillis()) / 1000 }
+                    Log.d(TAG, "  expirationTime: $savedExpiresAtMs (ms)")
+                    Log.d(TAG, "  timeUntilExpiry: $savedExpiresInSeconds seconds")
 
                     Toast.makeText(this, "로그인 성공!", Toast.LENGTH_SHORT).show()
+                    
+                    // 바로 이동 (commit()으로 동기 저장되므로 딜레이 불필요)
                     navigateToStoreList()
                 } else {
                     Log.e(TAG, "Token exchange failed", exception)

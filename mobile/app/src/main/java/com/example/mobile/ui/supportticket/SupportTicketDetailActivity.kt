@@ -3,15 +3,15 @@ package com.example.mobile.ui.supportticket
 import android.os.Bundle
 import android.widget.ImageButton
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import com.example.mobile.R
 import com.example.mobile.data.model.SupportTicketResponse
 import com.example.mobile.data.network.ApiClient
+import com.example.mobile.ui.base.BaseActivity
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class SupportTicketDetailActivity : AppCompatActivity() {
+class SupportTicketDetailActivity : BaseActivity() {
 
     private lateinit var tvTicketTitle: TextView
     private lateinit var tvStoreName: TextView

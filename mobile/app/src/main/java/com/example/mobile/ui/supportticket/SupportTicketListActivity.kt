@@ -7,14 +7,14 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.appcompat.app.AppCompatActivity
 import com.example.mobile.R
 import com.example.mobile.data.network.ApiClient
+import com.example.mobile.ui.base.BaseActivity
 import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class SupportTicketListActivity : AppCompatActivity() {
+class SupportTicketListActivity : BaseActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: SupportTicketAdapter

@@ -61,7 +61,26 @@ class OAuth2Client(db.Model):
     def check_redirect_uri(self, redirect_uri):
         return redirect_uri in self.redirect_uris.split()
 
+    def set_client_secret(self, client_secret):
+        """Set client secret with password hashing for security"""
+        self.client_secret = generate_password_hash(client_secret)
+
     def check_client_secret(self, client_secret):
+        """Check client secret using secure password hash comparison.
+        
+        Supports both hashed secrets (new) and plaintext secrets (legacy).
+        For backward compatibility, if hash check fails, fall back to plaintext comparison.
+        """
+        # Try hash comparison first (for newly hashed secrets)
+        try:
+            if check_password_hash(self.client_secret, client_secret):
+                return True
+        except (ValueError, TypeError):
+            # If client_secret is not a valid hash, try plaintext comparison (legacy)
+            pass
+        
+        # Fallback to plaintext comparison for backward compatibility
+        # This allows existing plaintext secrets to continue working
         return self.client_secret == client_secret
 
     def check_grant_type(self, grant_type):
@@ -98,7 +117,25 @@ class OAuth2AuthorizationCode(db.Model):
     user = db.relationship('User')
 
     def is_expired(self):
+        """Check if authorization code is expired.
+        
+        Note: expires_at is stored as Unix timestamp (Integer).
+        It should be set as: int(time.time()) + expiration_seconds
+        Example: expires_at = int(time.time()) + 300  # 5 minutes
+        """
         return self.expires_at < time.time()
+
+    def get_auth_time(self):
+        """Get authorization time as Unix timestamp.
+        
+        Returns the creation time of the authorization code as a Unix timestamp.
+        This is required by Authlib for OAuth2 compliance.
+        """
+        if self.created_at:
+            return int(self.created_at.timestamp())
+        # Fallback: use expires_at - default_expiration if created_at is not available
+        # Default expiration is typically 300 seconds (5 minutes)
+        return self.expires_at - 300
 
     def get_redirect_uri(self):
         return self.redirect_uri
@@ -128,13 +165,41 @@ class OAuth2Token(db.Model):
     user = db.relationship('User')
 
     def is_expired(self):
+        """Check if access token is expired.
+        
+        Note: expires_at is stored as Unix timestamp (Integer).
+        It should be set as: issued_at + expires_in
+        Example in save_token():
+            expires_at = issued_at + expires_in
+            where issued_at = int(time.time())
+            and expires_in = 3600 (default, 1 hour)
+        
+        This method compares expires_at (Integer timestamp) with time.time() (float).
+        The comparison works correctly because Python automatically handles int < float comparison.
+        """
         return self.expires_at < time.time()
 
     def is_revoked(self):
-        # For simplicity, tokens are not revoked by default
-        # In production, you would check a revoked_at field
-        # Check the revoked field if it exists, otherwise return False
+        """Check if token is revoked.
+        
+        For simplicity, tokens are not revoked by default.
+        In production, you would check a revoked_at field.
+        """
         return getattr(self, 'revoked', False)
+
+    def get_client_id(self):
+        """Get the client ID associated with this token.
+        
+        This is required by Authlib for OAuth2 token validation.
+        """
+        return self.client_id
+
+    def get_user_id(self):
+        """Get the user ID associated with this token.
+        
+        This is required by Authlib for OAuth2 token validation.
+        """
+        return self.user_id
 
     def check_client(self, client):
         """Check if the token belongs to the given client"""
@@ -144,7 +209,13 @@ class OAuth2Token(db.Model):
         return self.scope
 
     def get_expires_in(self):
-        return self.expires_at - int(time.time())
+        """Get remaining expiration time in seconds.
+        
+        Returns the number of seconds until the token expires.
+        Returns 0 if the token is already expired.
+        """
+        remaining = self.expires_at - int(time.time())
+        return max(0, remaining)
 
     def __repr__(self):
         return f'<OAuth2Token {self.access_token[:10]}...>'

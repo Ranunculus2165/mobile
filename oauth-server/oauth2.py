@@ -86,7 +86,12 @@ class RefreshTokenGrant(grants.RefreshTokenGrant):
 query_client = create_query_client_func(db.session, OAuth2Client)
 
 def save_token(token, request):
-    """Custom save_token function to handle expires_in -> expires_at conversion"""
+    """Custom save_token function to handle expires_in -> expires_at conversion
+    
+    Important: expires_at is stored as Unix timestamp (Integer).
+    Format: expires_at = current_timestamp + expires_in
+    Example: expires_at = int(time.time()) + 3600  # 1 hour from now
+    """
     if request.user:
         user_id = request.user.get_user_id()
     else:
@@ -95,8 +100,18 @@ def save_token(token, request):
     client = request.client
 
     # Convert expires_in to expires_at
-    expires_in = token.pop('expires_in', 3600)
-    issued_at = token.get('issued_at', int(time.time()))
+    # expires_in is in seconds (default: 3600 = 1 hour)
+    # IMPORTANT: Use .get() instead of .pop() to keep expires_in in response
+    expires_in = token.get('expires_in', 3600)
+    # Always use current time as issued_at to ensure accuracy
+    issued_at = int(time.time())
+    
+    # Ensure expires_in is an integer
+    if not isinstance(expires_in, int):
+        expires_in = int(expires_in)
+    
+    # Make sure expires_in is included in response for OAuth clients
+    token['expires_in'] = expires_in
 
     # Generate refresh token if not present
     refresh_token = token.get('refresh_token')
@@ -104,17 +119,45 @@ def save_token(token, request):
         from werkzeug.security import gen_salt
         refresh_token = gen_salt(48)
 
+    # Calculate expires_at as Integer timestamp: current_time + expires_in
+    expires_at = issued_at + expires_in
+    
+    access_token = token.get('access_token')
+    
+    # 디버깅: 토큰 저장 정보 로깅
+    print(f"💾 Saving OAuth Token to DB:")
+    print(f"   Access Token: {access_token[:10]}...{access_token[-5:] if len(access_token) > 15 else ''}")
+    print(f"   Client ID: {client.client_id}")
+    print(f"   User ID: {user_id}")
+    print(f"   Scope: {token.get('scope', '')}")
+    print(f"   Issued At: {issued_at} (Unix timestamp)")
+    print(f"   Expires In: {expires_in} seconds")
+    print(f"   Expires At: {expires_at} (Unix timestamp)")
+    print(f"   Current Time: {int(time.time())} (Unix timestamp)")
+    print(f"   Time Until Expiry: {expires_at - int(time.time())} seconds")
+
     item = OAuth2Token(
         client_id=client.client_id,
         user_id=user_id,
         token_type=token.get('token_type', 'Bearer'),
-        access_token=token.get('access_token'),
+        access_token=access_token,
         refresh_token=refresh_token,
         scope=token.get('scope', ''),
-        expires_at=issued_at + expires_in
+        expires_at=expires_at  # Integer timestamp: issued_at + expires_in
     )
     db.session.add(item)
     db.session.commit()
+    
+    # 저장 후 확인
+    saved_token = OAuth2Token.query.filter_by(access_token=access_token).first()
+    if saved_token:
+        print(f"✅ Token saved successfully to DB:")
+        print(f"   DB ID: {saved_token.id}")
+        print(f"   DB Expires At: {saved_token.expires_at}")
+        print(f"   DB Is Expired: {saved_token.is_expired()}")
+        print(f"   DB Is Revoked: {saved_token.is_revoked()}")
+    else:
+        print(f"❌ ERROR: Token was not saved to DB!")
 
     # Add refresh_token to token dict for response
     token['refresh_token'] = refresh_token

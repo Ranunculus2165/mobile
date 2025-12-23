@@ -2,8 +2,11 @@ package com.example.mobile.ui.base
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.mobile.R
+import com.example.mobile.data.auth.AuthStateManager
+import com.example.mobile.ui.auth.LoginActivity
 import com.example.mobile.ui.mypage.MyPageActivity
 import com.example.mobile.ui.storelist.StoreListActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -12,8 +15,70 @@ abstract class BaseActivity : AppCompatActivity() {
 
     protected var bottomNavigation: BottomNavigationView? = null
 
+    companion object {
+        private const val TAG = "BaseActivity"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // LoginActivity는 토큰 검증 제외
+        if (this !is LoginActivity) {
+            Log.d(TAG, "BaseActivity.onCreate() called from ${this::class.java.simpleName}")
+            // 토큰이 유효하지 않으면 onCreate를 계속 진행하지 않음
+            if (!checkAuthAndRedirect()) {
+                Log.w(TAG, "checkAuthAndRedirect() returned false, stopping onCreate()")
+                return
+            }
+            Log.d(TAG, "checkAuthAndRedirect() returned true, continuing onCreate()")
+        }
+    }
+    
+    /**
+     * OAuth 토큰 유효성을 확인하고, 만료되었거나 유효하지 않으면 로그인 화면으로 리다이렉트
+     * 모든 BaseActivity를 상속받는 Activity에서 자동으로 호출됨
+     * 
+     * @return 토큰이 유효하면 true, 유효하지 않으면 false
+     */
+    protected fun checkAuthAndRedirect(): Boolean {
+        val authStateManager = AuthStateManager.getInstance(this)
+        val authState = authStateManager.current
+        val accessToken = authState.accessToken
+        val expirationTime = authState.accessTokenExpirationTime
+        
+        // 토큰이 없거나 만료되었는지 확인 (LoginActivity와 동일하게 60초 여유 필요)
+        // accessTokenExpirationTime은 밀리초 단위이므로 밀리초로 비교
+        val currentTimeMs = System.currentTimeMillis()
+        val timeUntilExpirySeconds = if (expirationTime != null) {
+            (expirationTime - currentTimeMs) / 1000
+        } else {
+            0
+        }
+        val isTokenValid = accessToken != null && expirationTime != null && timeUntilExpirySeconds > 60
+        
+        if (!authState.isAuthorized || !isTokenValid) {
+            Log.w(TAG, "Token invalid or expired. Redirecting to login.")
+            Log.w(TAG, "  isAuthorized: ${authState.isAuthorized}")
+            Log.w(TAG, "  accessToken: ${if (accessToken != null) "${accessToken.take(10)}..." else "null"}")
+            Log.w(TAG, "  expirationTime: $expirationTime (ms)")
+            Log.w(TAG, "  currentTime: $currentTimeMs (ms)")
+            Log.w(TAG, "  timeUntilExpiry: $timeUntilExpirySeconds seconds")
+            
+            // 만료된 토큰 삭제
+            if (accessToken != null) {
+                authStateManager.clear()
+            }
+            
+            // 로그인 화면으로 리다이렉트
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+            return false
+        }
+        
+        Log.d(TAG, "Token valid. Time until expiry: $timeUntilExpirySeconds seconds")
+        return true
     }
 
     override fun setContentView(layoutResID: Int) {
