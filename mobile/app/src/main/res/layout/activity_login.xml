@@ -22,7 +22,7 @@
         <ImageView
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:src="@android:drawable/ic_menu_shopping_cart"
+            android:src="@android:drawable/ic_menu_info_details"
             android:tint="@android:color/white" />
 
     </LinearLayout>

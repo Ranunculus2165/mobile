@@ -51,9 +51,10 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        // WhiteHat 로그인 버튼 클릭 시 Customer scope로 로그인
+        // WhiteHat 로그인 버튼 클릭 시 Customer + Profile scope로 로그인
+        // Profile scope는 OAuth 서버의 /api/me 엔드포인트 접근에 필요
         findViewById<Button>(R.id.btnLoginCustomer).setOnClickListener {
-            startOAuthLogin(OAuthConfig.SCOPE_CUSTOMER)
+            startOAuthLogin("${OAuthConfig.SCOPE_CUSTOMER} ${OAuthConfig.SCOPE_PROFILE}")
         }
     }
 

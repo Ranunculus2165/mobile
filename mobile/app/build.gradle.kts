@@ -15,6 +15,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // AppAuth Redirect Scheme 설정
+        manifestPlaceholders["appAuthRedirectScheme"] = "com.example.mobile"
     }
 
     buildTypes {

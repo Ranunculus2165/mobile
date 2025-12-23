@@ -64,15 +64,11 @@ AUTHORIZE_TEMPLATE = '''
     </style>
 </head>
 <body>
-    <h2>Authorize Application</h2>
-    <p>Application <strong>{{ client_name }}</strong> wants to access your account with the following permissions:</p>
-    <ul>
-        {% for scope in scopes %}
-        <li>{{ scope }}</li>
-        {% endfor %}
-    </ul>
+    <h2>Authorization Request</h2>
+    <p><strong>{{ client.client_name }}</strong> is requesting access to your account.</p>
+    <p><strong>Scope:</strong> {{ scope }}</p>
     <form method="post">
-        <button type="submit" name="confirm" value="yes" class="btn">Authorize</button>
+        <button type="submit" name="confirm" value="yes" class="btn">Approve</button>
         <button type="submit" name="confirm" value="no" class="btn btn-deny">Deny</button>
     </form>
 </body>
@@ -124,73 +120,65 @@ def register():
     }), 201
 
 
-# User login (non-OAuth, for testing)
-@app.route('/auth/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
+# Login page for OAuth flow
+@app.route('/oauth/login', methods=['GET', 'POST'])
+def oauth_login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
 
-    if not username or not password:
-        return jsonify({'error': 'Missing username or password'}), 400
+        user = User.query.filter_by(username=username).first()
 
-    user = User.query.filter_by(username=username).first()
-    if not user or not user.check_password(password):
-        return jsonify({'error': 'Invalid credentials'}), 401
+        if user and user.check_password(password):
+            session['user_id'] = user.id
+            # Redirect back to authorize endpoint with original query params
+            from urllib.parse import urlencode
+            next_url = request.args.get('next', '/oauth/authorize')
+            if request.args:
+                # Preserve original OAuth parameters
+                return f'<script>window.location.href="{next_url}?" + window.location.search.substring(1);</script>'
+            return redirect(next_url)
+        else:
+            return render_template_string(LOGIN_TEMPLATE, error='Invalid username or password')
 
-    session['user_id'] = user.id
-    return jsonify({
-        'message': 'Login successful',
-        'user_id': user.id,
-        'username': user.username
-    })
+    return render_template_string(LOGIN_TEMPLATE)
 
 
-# OAuth 2.0 Authorization endpoint
+# OAuth 2.0 Authorization Endpoint
 @app.route('/oauth/authorize', methods=['GET', 'POST'])
 def authorize():
-    if request.method == 'GET':
-        # Check if user is logged in
-        user_id = session.get('user_id')
-        if not user_id:
-            # Redirect to login page
-            return render_template_string(LOGIN_TEMPLATE, error=None)
-
-        user = User.query.get(user_id)
-        if not user:
-            return render_template_string(LOGIN_TEMPLATE, error='User not found')
-
-        # Get authorization request
-        try:
-            grant = authorization.get_consent_grant(end_user=user)
-        except Exception as e:
-            return jsonify({'error': str(e)}), 400
-
-        client = grant.client
-        scopes = grant.request.scope.split() if grant.request.scope else []
-
-        return render_template_string(
-            AUTHORIZE_TEMPLATE,
-            client_name=client.client_name or client.client_id,
-            scopes=scopes
-        )
-
-    # POST: User confirmed or denied
+    # Get current user from session
     user_id = session.get('user_id')
     if not user_id:
-        return jsonify({'error': 'Not logged in'}), 401
+        # Redirect to login page with current URL params
+        from urllib.parse import urlencode
+        login_url = f'/oauth/login?next=/oauth/authorize&{urlencode(request.args)}'
+        return f'<script>window.location.href="{login_url}";</script>'
 
     user = User.query.get(user_id)
-    confirm = request.form.get('confirm')
 
-    if confirm == 'yes':
+    if request.method == 'GET':
         try:
             grant = authorization.get_consent_grant(end_user=user)
-            return authorization.create_authorization_response(grant_user=user)
+            client = grant.client
+            scope = grant.request.scope
+
+            return render_template_string(
+                AUTHORIZE_TEMPLATE,
+                client=client,
+                scope=scope
+            )
         except Exception as e:
             return jsonify({'error': str(e)}), 400
+
+    # POST - User confirmed or denied
+    confirm = request.form.get('confirm')
+    if confirm == 'yes':
+        grant_user = user
     else:
-        return authorization.create_authorization_response(grant_user=None)
+        grant_user = None
+
+    return authorization.create_authorization_response(grant_user=grant_user)
 
 
 # OAuth 2.0 Token endpoint
@@ -292,13 +280,13 @@ def create_test_data():
     """Create test users and OAuth client."""
     db.create_all()
 
-    # Create customer user
-    customer = User(username='customer1', email='customer@example.com', role='customer')
+    # Create customer user (wheats DB와 매핑: consumer1@wheats.local)
+    customer = User(username='customer1', email='consumer1@wheats.local', role='customer')
     customer.set_password('password123')
     db.session.add(customer)
 
-    # Create store owner user
-    store_owner = User(username='storeowner1', email='store@example.com', role='store')
+    # Create store owner user (wheats DB와 매핑: merchant1@wheats.local)
+    store_owner = User(username='storeowner1', email='merchant1@wheats.local', role='store')
     store_owner.set_password('password123')
     db.session.add(store_owner)
 

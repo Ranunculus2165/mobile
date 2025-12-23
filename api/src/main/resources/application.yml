@@ -20,6 +20,11 @@ spring:
       hibernate:
         format_sql: true    # SQL 이쁘게 출력
 
+# OAuth 서버 설정
+oauth:
+  server:
+    url: http://oauth-server:3000  # Docker 내부에서는 서비스 이름 사용
+
 logging:
   level:
     org.hibernate.SQL: debug

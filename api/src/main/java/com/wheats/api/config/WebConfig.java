@@ -19,7 +19,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
-                        "/api/auth/login",        // 로그인은 인증 불필요
                         "/api/stores",            // 가게 목록은 공개
                         "/api/stores/**"          // 가게 상세 정보도 공개
                 );
