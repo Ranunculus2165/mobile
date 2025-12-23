@@ -9,13 +9,13 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Python 의존성 복사 및 설치
-COPY docs/legendwon/oauth2.0_code-main/requirements.txt /tmp/requirements.txt
+COPY oauth-server/requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 # OAuth 서버 코드 복사
-COPY docs/legendwon/oauth2.0_code-main/app.py \
-     docs/legendwon/oauth2.0_code-main/oauth2.py \
-     docs/legendwon/oauth2.0_code-main/models.py \
+COPY oauth-server/app.py \
+     oauth-server/oauth2.py \
+     oauth-server/models.py \
      ./
 
 # 환경변수 설정
