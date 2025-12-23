@@ -76,16 +76,43 @@ abstract class BaseActivity : AppCompatActivity() {
                 authStateManager.clear()
             }
             
-            // 로그인 화면으로 리다이렉트
-            val intent = Intent(this, LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            finish()
+            redirectToLogin(clearAuth = accessToken != null)
             return false
         }
         
         Log.d(TAG, "Token valid. Time until expiry: $timeUntilExpirySeconds seconds")
         return true
+    }
+
+    /**
+     * 현재 로그인 상태(토큰 존재 + 만료 여유 60초)를 반환.
+     * 공개 화면에서 "보호 기능 호출" 전에 체크할 때 사용.
+     */
+    protected fun isLoggedIn(): Boolean {
+        val authState = AuthStateManager.getInstance(this).current
+        val accessToken = authState.accessToken
+        val expirationTime = authState.accessTokenExpirationTime
+
+        val currentTimeMs = System.currentTimeMillis()
+        val timeUntilExpirySeconds = if (expirationTime != null) {
+            (expirationTime - currentTimeMs) / 1000
+        } else {
+            0
+        }
+        return authState.isAuthorized && accessToken != null && expirationTime != null && timeUntilExpirySeconds > 60
+    }
+
+    /**
+     * 로그인 화면으로 자연스럽게 이동(401 등 인증 필요 상황에서 사용)
+     */
+    protected fun redirectToLogin(clearAuth: Boolean = true) {
+        if (clearAuth) {
+            AuthStateManager.getInstance(this).clear()
+        }
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 
     override fun setContentView(layoutResID: Int) {

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
 import com.example.mobile.data.network.ApiClient
+import com.example.mobile.ui.auth.LoginActivity
 import com.example.mobile.ui.base.BaseActivity
 import com.example.mobile.ui.cart.CartActivity
 import kotlinx.coroutines.launch
@@ -71,8 +72,12 @@ class StoreDetailActivity : BaseActivity() {
 
         // 플로팅 버튼 클릭 리스너
         layoutCartButton.setOnClickListener {
-            val intent = Intent(this, CartActivity::class.java)
-            startActivity(intent)
+            // 장바구니는 보호된 기능이므로, 비로그인 상태면 자연스럽게 로그인으로 유도
+            if (!isLoggedIn()) {
+                startActivity(Intent(this, LoginActivity::class.java))
+                return@setOnClickListener
+            }
+            startActivity(Intent(this, CartActivity::class.java))
         }
 
         // 일단 목록에서 받은 값으로 먼저 보여주고
@@ -102,6 +107,13 @@ class StoreDetailActivity : BaseActivity() {
     private fun updateCartBadge() {
         lifecycleScope.launch {
             try {
+                // 비로그인 상태에서는 장바구니 조회 자체를 하지 않는다 (401 노출 방지)
+                if (!isLoggedIn()) {
+                    tvCartBadge.visibility = View.GONE
+                    layoutCartButton.visibility = View.GONE
+                    return@launch
+                }
+
                 val cart = ApiClient.cartApi.getMyCart()
                 if (cart != null && cart.items.isNotEmpty()) {
                     val itemCount = cart.items.sumOf { it.quantity }
@@ -115,6 +127,10 @@ class StoreDetailActivity : BaseActivity() {
             } catch (e: retrofit2.HttpException) {
                 if (e.code() == 404) {
                     // 장바구니가 비어있음
+                    tvCartBadge.visibility = View.GONE
+                    layoutCartButton.visibility = View.GONE
+                } else if (e.code() == 401) {
+                    // 인증 필요: 뱃지/버튼만 숨기고, 사용자 액션(담기/장바구니 버튼)에서 로그인 유도
                     tvCartBadge.visibility = View.GONE
                     layoutCartButton.visibility = View.GONE
                 } else {

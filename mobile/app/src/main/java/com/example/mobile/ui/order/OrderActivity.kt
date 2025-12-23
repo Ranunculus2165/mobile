@@ -21,6 +21,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.async
+import retrofit2.Response
 
 class OrderActivity : BaseActivity() {
 
@@ -91,10 +92,10 @@ class OrderActivity : BaseActivity() {
         lifecycleScope.launch {
             try {
                 // 회원 정보와 가게 정보를 병렬로 가져오기
-                val (myPageResponse, storeDetail) = withContext(Dispatchers.IO) {
+                val (myPageHttpResponse, storeDetail) = withContext(Dispatchers.IO) {
                     coroutineScope {
                         val myPageDeferred = async {
-                            ApiClient.myPageApi.getMyPage().execute().body()
+                            ApiClient.myPageApi.getMyPage().execute()
                         }
                         val storeDeferred = async {
                             cart?.let { ApiClient.storeApi.getStoreDetail(it.storeId) }
@@ -104,15 +105,10 @@ class OrderActivity : BaseActivity() {
                 }
 
                 // 포인트 정보 설정
-                if (myPageResponse != null) {
-                    availablePoint = myPageResponse.point
-                } else {
-                    Log.e("OrderActivity", "회원 정보를 불러올 수 없습니다")
-                    Toast.makeText(
-                        this@OrderActivity,
-                        "회원 정보를 불러오는데 실패했습니다",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                val myPageResponse = myPageHttpResponse.body()
+                if (!myPageHttpResponse.isSuccessful || myPageResponse == null) {
+                    Log.e("OrderActivity", "회원 정보를 불러올 수 없습니다 (code=${myPageHttpResponse.code()})")
+                    Toast.makeText(this@OrderActivity, "회원 정보를 불러오는데 실패했습니다", Toast.LENGTH_SHORT).show()
                     finish()
                     return@launch
                 }

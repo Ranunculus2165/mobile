@@ -1,14 +1,18 @@
 package com.example.mobile.data.network
 
-import android.content.Context
+import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import com.example.mobile.WhEatsApplication
 import com.example.mobile.data.auth.AuthStateManager
+import com.example.mobile.ui.auth.LoginActivity
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 object ApiClient {
 
@@ -16,6 +20,30 @@ object ApiClient {
         level = HttpLoggingInterceptor.Level.BODY
         // 토큰이 로그로 노출되지 않도록 마스킹
         redactHeader("Authorization")
+    }
+
+    private val isRedirectingToLogin = AtomicBoolean(false)
+
+    private fun redirectToLoginOnce() {
+        if (!isRedirectingToLogin.compareAndSet(false, true)) return
+
+        val context = WhEatsApplication.instance
+        // 토큰/상태 정리
+        AuthStateManager.getInstance(context).clear()
+
+        // UI 스레드에서 로그인으로 이동
+        Handler(Looper.getMainLooper()).post {
+            val intent = Intent(context, LoginActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            context.startActivity(intent)
+        }
+
+        // 연속 호출 방지 (짧은 쿨다운)
+        Handler(Looper.getMainLooper()).postDelayed(
+            { isRedirectingToLogin.set(false) },
+            1200
+        )
     }
 
     // OAuth Access Token을 Authorization 헤더에 자동으로 추가하는 인터셉터
@@ -64,11 +92,22 @@ object ApiClient {
         chain.proceed(request)
     }
 
+    // 전역 401 처리: 개별 Activity에서 매번 처리하지 않아도 로그인 화면으로 자연스럽게 전환
+    private val unauthorizedInterceptor = Interceptor { chain ->
+        val response = chain.proceed(chain.request())
+        if (response.code == 401) {
+            android.util.Log.w("ApiClient", "🔐 HTTP 401 detected. Redirecting to LoginActivity.")
+            redirectToLoginOnce()
+        }
+        response
+    }
+
     private val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
         .addInterceptor(authInterceptor)
+        .addInterceptor(unauthorizedInterceptor)
         // authInterceptor가 헤더를 붙인 뒤에 로깅하도록 순서 조정
         .addInterceptor(loggingInterceptor)
         .build()

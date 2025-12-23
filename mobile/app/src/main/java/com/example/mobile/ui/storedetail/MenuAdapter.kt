@@ -10,9 +10,11 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
+import com.example.mobile.data.auth.AuthStateManager
 import com.example.mobile.data.model.CartResponse
 import com.example.mobile.data.model.MenuItem
 import com.example.mobile.data.network.ApiClient
+import com.example.mobile.ui.auth.LoginActivity
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -69,6 +71,17 @@ class MenuAdapter(
         private fun addToCart(item: MenuItem, force: Boolean = false) {
             lifecycleScope.launch {
                 try {
+                    // 장바구니는 보호된 기능이므로, 비로그인 상태면 401을 맞기 전에 로그인으로 유도
+                    if (!isLoggedIn()) {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(itemView.context, "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
+                            itemView.context.startActivity(
+                                android.content.Intent(itemView.context, LoginActivity::class.java)
+                            )
+                        }
+                        return@launch
+                    }
+
                     val request = com.example.mobile.data.model.CartItemRequest(
                         storeId = storeId,
                         menuId = item.id,
@@ -105,6 +118,15 @@ class MenuAdapter(
                     android.util.Log.e("MenuAdapter", "스택 트레이스:", e)
                     
                     when (e.code()) {
+                        401 -> {
+                            // 인증 필요: 에러 토스트 대신 로그인 화면으로 자연스럽게 이동
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(itemView.context, "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
+                                itemView.context.startActivity(
+                                    android.content.Intent(itemView.context, LoginActivity::class.java)
+                                )
+                            }
+                        }
                         409 -> {
                             // 409 Conflict: 다른 가게의 장바구니가 존재할 때 팝업 표시
                             try {
@@ -194,6 +216,20 @@ class MenuAdapter(
                     ).show()
                 }
             }
+        }
+
+        private fun isLoggedIn(): Boolean {
+            val authState = AuthStateManager.getInstance(itemView.context).current
+            val accessToken = authState.accessToken
+            val expirationTime = authState.accessTokenExpirationTime
+
+            val currentTimeMs = System.currentTimeMillis()
+            val timeUntilExpirySeconds = if (expirationTime != null) {
+                (expirationTime - currentTimeMs) / 1000
+            } else {
+                0
+            }
+            return authState.isAuthorized && accessToken != null && expirationTime != null && timeUntilExpirySeconds > 60
         }
 
         private fun showCartConflictDialog(item: MenuItem, existingCart: CartResponse) {

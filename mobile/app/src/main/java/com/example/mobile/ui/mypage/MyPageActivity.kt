@@ -15,6 +15,7 @@ import com.example.mobile.ui.base.BaseActivity
 import com.example.mobile.ui.orderhistory.OrderHistoryActivity
 import com.example.mobile.ui.supportticket.SupportTicketListActivity
 import kotlinx.coroutines.*
+import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -59,8 +60,13 @@ class MyPageActivity : BaseActivity() {
     private fun loadMyPageData() {
         uiScope.launch {
             try {
-                val response: MyPageResponse = withContext(Dispatchers.IO) {
-                    ApiClient.myPageApi.getMyPage().execute().body()!!
+                val httpResponse: Response<MyPageResponse> = withContext(Dispatchers.IO) {
+                    ApiClient.myPageApi.getMyPage().execute()
+                }
+
+                val response = httpResponse.body()
+                if (!httpResponse.isSuccessful || response == null) {
+                    throw IllegalStateException("MyPage response invalid (code=${httpResponse.code()})")
                 }
 
                 // 사용자 정보 표시
