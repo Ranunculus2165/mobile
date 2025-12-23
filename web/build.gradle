@@ -1,0 +1,37 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.4'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.wh.eats'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // JSP
+    implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+    implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.0'
+    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
+
+    // API 호출용
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
