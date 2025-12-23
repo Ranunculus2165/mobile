@@ -16,6 +16,9 @@ import kotlinx.coroutines.launch
 
 class StoreDetailActivity : BaseActivity() {
 
+    // 가게 상세도 공개 화면: 인증 불필요
+    override fun requiresAuth(): Boolean = false
+
     companion object {
         const val EXTRA_STORE_ID = "extra_store_id"
         const val EXTRA_STORE_NAME = "extra_store_name"

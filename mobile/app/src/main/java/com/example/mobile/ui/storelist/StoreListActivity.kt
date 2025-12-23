@@ -14,6 +14,9 @@ import kotlinx.coroutines.*
 
 class StoreListActivity : BaseActivity() {
 
+    // 가게 목록은 공개 화면: 인증 불필요
+    override fun requiresAuth(): Boolean = false
+
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: StoreListAdapter
 

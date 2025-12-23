@@ -19,11 +19,18 @@ abstract class BaseActivity : AppCompatActivity() {
         private const val TAG = "BaseActivity"
     }
 
+    /**
+     * 이 Activity가 인증(토큰 유효성) 체크가 필요한지 여부.
+     * - 기본값: true (대부분의 보호된 화면)
+     * - 예외: 가게 목록/가게 상세처럼 공개 화면은 false로 override
+     */
+    protected open fun requiresAuth(): Boolean = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         // LoginActivity는 토큰 검증 제외
-        if (this !is LoginActivity) {
+        if (this !is LoginActivity && requiresAuth()) {
             Log.d(TAG, "BaseActivity.onCreate() called from ${this::class.java.simpleName}")
             // 토큰이 유효하지 않으면 onCreate를 계속 진행하지 않음
             if (!checkAuthAndRedirect()) {
