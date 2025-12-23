@@ -56,10 +56,11 @@ dependencies {
     // ★ HTTP 로깅
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-    // ⚠️ AppAuth는 나중에 OAuth 통합 시 사용 예정
-    // 현재는 JWT 기반 인증을 사용하므로 제거
-    // implementation("net.openid:appauth:0.11.1")
-    // implementation("androidx.browser:browser:1.7.0")
+    // OAuth 2.0 클라이언트 라이브러리
+    implementation("net.openid:appauth:0.11.1")
+    
+    // Custom Tabs (OAuth 인증 브라우저)
+    implementation("androidx.browser:browser:1.7.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")

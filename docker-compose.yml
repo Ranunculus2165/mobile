@@ -14,7 +14,7 @@ services:
     build:
       context: .                # ✅ 프로젝트 루트 전체를 컨텍스트로
       dockerfile: docker/db/Dockerfile   # ✅ 실제 Dockerfile 위치
-    container_name: wheats-db
+    container_name: wh-eats-db
     environment:
       MYSQL_DATABASE: wheats
       MYSQL_USER: wheats
@@ -26,21 +26,30 @@ services:
       - wheats-mysql-data:/var/lib/mysql
     restart: always
 
-  # ⚠️ OAuth 서버는 나중에 OAuth 통합 시 사용 예정
-  # 현재는 JWT 기반 인증을 사용하므로 주석 처리
-  # oauth-server:
-  #   build:
-  #     context: .
-  #     dockerfile: docker/oauth-server/Dockerfile
-  #   container_name: wh-eats-oauth-server
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     FLASK_ENV: development
-  #     FLASK_APP: app.py
-  #   depends_on:
-  #     - db
-  #   restart: unless-stopped
+  # OAuth 서버 (Flask)
+  oauth-server:
+    build:
+      context: .
+      dockerfile: docker/oauth-server/Dockerfile
+    container_name: wh-eats-oauth-server
+    ports:
+      - "3000:3000"
+    environment:
+      - SECRET_KEY=${OAUTH_SECRET_KEY:-dev-secret-key}
+      - DATABASE_URL=${OAUTH_DATABASE_URL:-sqlite:///oauth2.db}
+      - PORT=3000
+      - FLASK_ENV=development
+      - FLASK_APP=app.py
+    volumes:
+      # 데이터베이스 파일 영속성
+      - ./oauth2.db:/app/oauth2.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   wheats-mysql-data:

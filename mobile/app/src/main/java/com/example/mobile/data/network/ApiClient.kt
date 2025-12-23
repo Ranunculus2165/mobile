@@ -1,6 +1,8 @@
 package com.example.mobile.data.network
 
-import com.example.mobile.data.auth.TokenManager
+import android.content.Context
+import com.example.mobile.WhEatsApplication
+import com.example.mobile.data.auth.AuthStateManager
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -14,12 +16,17 @@ object ApiClient {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
-    // Authorization 헤더를 자동으로 추가하는 인터셉터
+    // OAuth Access Token을 Authorization 헤더에 자동으로 추가하는 인터셉터
     private val authInterceptor = Interceptor { chain ->
-        val token = TokenManager.getToken()
-        val request = if (token != null) {
+        val context = WhEatsApplication.instance
+        val authStateManager = AuthStateManager.getInstance(context)
+        val authState = authStateManager.current
+        
+        val accessToken = authState.accessToken
+        
+        val request = if (accessToken != null) {
             chain.request().newBuilder()
-                .addHeader("Authorization", "Bearer $token")
+                .addHeader("Authorization", "Bearer $accessToken")
                 .build()
         } else {
             chain.request()
