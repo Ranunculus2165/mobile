@@ -3,16 +3,19 @@ package com.example.mobile.ui.storelist
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
 import com.example.mobile.data.model.Store
 import com.example.mobile.data.network.ApiClient
+import com.example.mobile.ui.base.BaseActivity
 import com.example.mobile.ui.storedetail.StoreDetailActivity
 import kotlinx.coroutines.*
 
-class StoreListActivity : AppCompatActivity() {
+class StoreListActivity : BaseActivity() {
+
+    // 가게 목록은 공개 화면: 인증 불필요
+    override fun requiresAuth(): Boolean = false
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: StoreListAdapter
@@ -23,6 +26,10 @@ class StoreListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // BaseActivity의 checkAuthAndRedirect()가 자동으로 호출됨
+        // 토큰이 유효하지 않으면 자동으로 LoginActivity로 리다이렉트됨
+        
         setContentView(R.layout.activity_store_list)
 
         recyclerView = findViewById(R.id.rvStoreList)

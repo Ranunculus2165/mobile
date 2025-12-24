@@ -1,26 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="24dp"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tvDashboardInfo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Loading..."
-        android:textSize="18sp" />
+    <LinearLayout
+        android:id="@+id/layoutContent"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- 🔥 DEBUG 텍스트 (기본 숨김) -->
-    <TextView
-        android:id="@+id/tvDebugInfo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="DEBUG: (placeholder)"
-        android:textSize="14sp"
-        android:textColor="#FF5722"
-        android:paddingTop="16dp"
-        android:visibility="gone" />   <!-- 기본 숨김 -->
+        <TextView
+            android:id="@+id/tvDashboardInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Loading..."
+            android:textSize="18sp" />
 
-</LinearLayout>
+        <!-- 🔥 DEBUG 텍스트 (기본 숨김) -->
+        <TextView
+            android:id="@+id/tvDebugInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="DEBUG: (placeholder)"
+            android:textSize="14sp"
+            android:textColor="#FF5722"
+            android:paddingTop="16dp"
+            android:visibility="gone" />   <!-- 기본 숨김 -->
+
+    </LinearLayout>
+
+    <!-- 하단 내비게이션 -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        app:menu="@menu/bottom_navigation"
+        app:itemIconTint="@color/bottom_nav_item_color"
+        app:itemTextColor="@color/bottom_nav_item_color"
+        app:itemRippleColor="@color/teal_200"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

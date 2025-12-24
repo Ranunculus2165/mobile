@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="화햇딜리버리"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="48dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="OAuth 2.0 로그인"
+        android:textSize="18sp"
+        android:layout_marginBottom="24dp" />
+
+    <Button
+        android:id="@+id/btnLoginCustomer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="고객으로 로그인 (Customer Scope)"
+        android:layout_marginBottom="16dp"
+        android:padding="16dp" />
+
+    <Button
+        android:id="@+id/btnLoginStore"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="점주로 로그인 (Store Scope)"
+        android:layout_marginBottom="32dp"
+        android:padding="16dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#CCCCCC"
+        android:layout_marginVertical="24dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🚨 취약점 테스트"
+        android:textSize="18sp"
+        android:textColor="#FF0000"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/btnExploitVulnerability"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🚨 Scope 권한 상승 공격\n(Customer → Store)"
+        android:backgroundTint="#FF0000"
+        android:textColor="#FFFFFF"
+        android:padding="16dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="※ 먼저 'Customer로 로그인' 후\n위 버튼을 눌러 권한 상승을 시도하세요"
+        android:textSize="12sp"
+        android:textColor="#666666"
+        android:gravity="center"
+        android:layout_marginTop="16dp" />
+
+</LinearLayout>

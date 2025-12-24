@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.mobile">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- 인터넷 권한 -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".WhEatsApplication"
         android:allowBackup="true"
         android:label="WH EATS"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config">
 
         <!-- 앱 최초 실행 화면 -->
         <activity
@@ -26,6 +27,12 @@
 
         <!-- 가게 상세 화면 -->
         <activity android:name=".ui.storedetail.StoreDetailActivity" />
+
+        <!-- 장바구니 화면 -->
+        <activity android:name=".ui.cart.CartActivity" />
+
+        <!-- 주문 화면 -->
+        <activity android:name=".ui.order.OrderActivity" />
 
         <!-- 점주 대시보드 (딥링크 취약점 진입점) -->
         <activity
@@ -46,6 +53,41 @@
             </intent-filter>
         </activity>
 
+        <!-- 마이페이지 -->
+        <activity android:name=".ui.mypage.MyPageActivity" />
+
+        <!-- 전체 주문 내역 -->
+        <activity android:name=".ui.orderhistory.OrderHistoryActivity" />
+
+        <!-- 영수증 화면 -->
+        <activity android:name=".ui.receipt.ReceiptActivity" />
+
+        <!-- 1대1 문의 목록 -->
+        <activity android:name=".ui.supportticket.SupportTicketListActivity" />
+
+        <!-- 1대1 문의 작성 -->
+        <activity android:name=".ui.supportticket.CreateSupportTicketActivity" />
+
+        <!-- 1대1 문의 상세 -->
+        <activity android:name=".ui.supportticket.SupportTicketDetailActivity" />
+
+        <!-- 로그인 화면 -->
+        <activity android:name=".ui.auth.LoginActivity" />
+
+        <!-- OAuth Redirect Callback Activity -->
+        <activity
+            android:name="net.openid.appauth.RedirectUriReceiverActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="com.example.mobile"
+                    android:host="oauth2callback" />
+            </intent-filter>
+        </activity>
 
     </application>
 

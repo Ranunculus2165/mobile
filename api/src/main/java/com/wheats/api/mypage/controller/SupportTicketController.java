@@ -1,5 +1,6 @@
 package com.wheats.api.mypage.controller;
 
+import com.wheats.api.auth.util.AuthContext;
 import com.wheats.api.mypage.dto.CreateSupportTicketRequest;
 import com.wheats.api.mypage.dto.SupportTicketResponse;
 import com.wheats.api.mypage.service.SupportTicketService;
@@ -21,7 +22,7 @@ public class SupportTicketController {
     /* 내 1:1 문의 목록 조회 */
     @GetMapping
     public ResponseEntity<List<SupportTicketResponse>> getMySupportTickets() {
-        Long userId = 1L; // TODO: 나중에 OAuth 붙이면 토큰에서 추출
+        Long userId = AuthContext.getCurrentUserId();
 
         List<SupportTicketResponse> tickets = supportTicketService.getMyTickets(userId);
         return ResponseEntity.ok(tickets);
@@ -32,7 +33,7 @@ public class SupportTicketController {
     public ResponseEntity<SupportTicketResponse> createSupportTicket(
             @RequestBody CreateSupportTicketRequest request
     ) {
-        Long userId = 1L; // TODO: 나중에 OAuth 붙이면 토큰에서 추출
+        Long userId = AuthContext.getCurrentUserId();
 
         SupportTicketResponse created = supportTicketService.createTicket(userId, request);
         return ResponseEntity.ok(created);

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(venvScriptsactivate)",
+      "Bash(pip install:*)",
+      "Bash(. venv/Scripts/activate)",
+      "Bash(dir:*)",
+      "Bash(curl:*)",
+      "Bash(python -m json.tool:*)",
+      "Bash(adb shell:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

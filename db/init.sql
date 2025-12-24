@@ -77,7 +77,7 @@ INSERT INTO users (
     '테스트 소비자',
     'consumer1@wheats.local',
     'CONSUMER',
-    100000,
+    1000000,
     NOW()
   ),
   (
@@ -85,8 +85,38 @@ INSERT INTO users (
     '테스트 점주',
     'merchant1@wheats.local',
     'MERCHANT',
-    100000,
+    1000000,
     NOW()
+  ),
+  (
+    3,
+    '테스트 관리자',
+    'admin1@wheats.local',
+    'ADMIN',
+    1000000,
+    NOW()
+  );
+
+  INSERT INTO oauth_accounts (
+    id, user_id, provider, provider_id
+  ) VALUES
+  (
+    1,
+    1,
+    'GOOGLE',
+    '1234567890'
+  ),
+  (
+    2,
+    2,
+    'GOOGLE',
+    '1234567890'
+  ),
+  (
+    3,
+    3,
+    'GOOGLE',
+    '1234567890'
   );
 
 -- =========================

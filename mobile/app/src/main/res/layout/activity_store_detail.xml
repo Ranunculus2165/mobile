@@ -47,7 +47,78 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:padding="8dp"
+        android:paddingBottom="16dp"
+        android:clipToPadding="false"
         app:layout_constraintTop_toBottomOf="@id/layoutStoreInfo"
+        app:layout_constraintBottom_toTopOf="@id/layoutCartButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 장바구니 플로팅 버튼 -->
+    <LinearLayout
+        android:id="@+id/layoutCartButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#20B2AA"
+        android:padding="16dp"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_menu_view"
+            android:tint="@android:color/white" />
+
+        <TextView
+            android:id="@+id/tvCartButtonText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="장바구니 보기"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
+
+    <!-- 장바구니 아이템 개수 배지 -->
+    <TextView
+        android:id="@+id/tvCartBadge"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:text="0"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:background="@drawable/cart_badge_background"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/layoutCartButton"
+        app:layout_constraintEnd_toEndOf="@id/layoutCartButton"
+        android:layout_marginTop="-8dp"
+        android:layout_marginEnd="-8dp" />
+
+    <!-- 하단 내비게이션 -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        app:menu="@menu/bottom_navigation"
+        app:itemIconTint="@color/bottom_nav_item_color"
+        app:itemTextColor="@color/bottom_nav_item_color"
+        app:itemRippleColor="@color/teal_200"
+        app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

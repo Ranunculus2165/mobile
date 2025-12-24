@@ -1,0 +1,222 @@
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
+import time
+
+db = SQLAlchemy()
+
+
+class User(db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False, index=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(20), default='customer')  # customer, store, admin
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def get_user_id(self):
+        return self.id
+
+    def __repr__(self):
+        return f'<User {self.username}>'
+
+
+class OAuth2Client(db.Model):
+    __tablename__ = 'oauth2_clients'
+
+    id = db.Column(db.Integer, primary_key=True)
+    client_id = db.Column(db.String(48), unique=True, nullable=False, index=True)
+    client_secret = db.Column(db.String(120), nullable=False)
+    client_name = db.Column(db.String(100), nullable=False)
+
+    # OAuth 2.0 required fields
+    redirect_uris = db.Column(db.Text, nullable=False)  # Space-separated URIs
+    grant_types = db.Column(db.Text, nullable=False)    # Space-separated grant types
+    response_types = db.Column(db.Text, nullable=False) # Space-separated response types
+    scope = db.Column(db.Text, default='')
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def get_client_id(self):
+        return self.client_id
+
+    def get_default_redirect_uri(self):
+        return self.redirect_uris.split()[0] if self.redirect_uris else None
+
+    def get_allowed_scope(self, scope):
+        if not scope:
+            return ''
+        allowed = set(self.scope.split()) if self.scope else set()
+        requested = set(scope.split())
+        return ' '.join(allowed & requested)
+
+    def check_redirect_uri(self, redirect_uri):
+        return redirect_uri in self.redirect_uris.split()
+
+    def set_client_secret(self, client_secret):
+        """Set client secret with password hashing for security"""
+        self.client_secret = generate_password_hash(client_secret)
+
+    def check_client_secret(self, client_secret):
+        """Check client secret using secure password hash comparison.
+        
+        Supports both hashed secrets (new) and plaintext secrets (legacy).
+        For backward compatibility, if hash check fails, fall back to plaintext comparison.
+        """
+        # Try hash comparison first (for newly hashed secrets)
+        try:
+            if check_password_hash(self.client_secret, client_secret):
+                return True
+        except (ValueError, TypeError):
+            # If client_secret is not a valid hash, try plaintext comparison (legacy)
+            pass
+        
+        # Fallback to plaintext comparison for backward compatibility
+        # This allows existing plaintext secrets to continue working
+        return self.client_secret == client_secret
+
+    def check_grant_type(self, grant_type):
+        return grant_type in self.grant_types.split()
+
+    def check_response_type(self, response_type):
+        return response_type in self.response_types.split()
+
+    def check_endpoint_auth_method(self, method, endpoint):
+        """Check if the client supports the given auth method for the endpoint."""
+        # Allow all methods for simplicity (client_secret_basic, client_secret_post, none)
+        return True
+
+    def __repr__(self):
+        return f'<OAuth2Client {self.client_name}>'
+
+
+class OAuth2AuthorizationCode(db.Model):
+    __tablename__ = 'oauth2_authorization_codes'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(120), unique=True, nullable=False, index=True)
+    client_id = db.Column(db.String(48), nullable=False)
+    redirect_uri = db.Column(db.Text, nullable=False)
+    scope = db.Column(db.Text, default='')
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'))
+
+    code_challenge = db.Column(db.String(128))
+    code_challenge_method = db.Column(db.String(10))
+
+    expires_at = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User')
+
+    def is_expired(self):
+        """Check if authorization code is expired.
+        
+        Note: expires_at is stored as Unix timestamp (Integer).
+        It should be set as: int(time.time()) + expiration_seconds
+        Example: expires_at = int(time.time()) + 300  # 5 minutes
+        """
+        return self.expires_at < time.time()
+
+    def get_auth_time(self):
+        """Get authorization time as Unix timestamp.
+        
+        Returns the creation time of the authorization code as a Unix timestamp.
+        This is required by Authlib for OAuth2 compliance.
+        """
+        if self.created_at:
+            return int(self.created_at.timestamp())
+        # Fallback: use expires_at - default_expiration if created_at is not available
+        # Default expiration is typically 300 seconds (5 minutes)
+        return self.expires_at - 300
+
+    def get_redirect_uri(self):
+        return self.redirect_uri
+
+    def get_scope(self):
+        return self.scope
+
+    def __repr__(self):
+        return f'<OAuth2AuthorizationCode {self.code}>'
+
+
+class OAuth2Token(db.Model):
+    __tablename__ = 'oauth2_tokens'
+
+    id = db.Column(db.Integer, primary_key=True)
+    client_id = db.Column(db.String(48), nullable=False)
+    token_type = db.Column(db.String(40), default='Bearer')
+    access_token = db.Column(db.String(255), unique=True, nullable=False, index=True)
+    refresh_token = db.Column(db.String(255), unique=True, index=True)
+    scope = db.Column(db.Text, default='')
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'))
+
+    expires_at = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    revoked = db.Column(db.Boolean, default=False)
+
+    user = db.relationship('User')
+
+    def is_expired(self):
+        """Check if access token is expired.
+        
+        Note: expires_at is stored as Unix timestamp (Integer).
+        It should be set as: issued_at + expires_in
+        Example in save_token():
+            expires_at = issued_at + expires_in
+            where issued_at = int(time.time())
+            and expires_in = 3600 (default, 1 hour)
+        
+        This method compares expires_at (Integer timestamp) with time.time() (float).
+        The comparison works correctly because Python automatically handles int < float comparison.
+        """
+        return self.expires_at < time.time()
+
+    def is_revoked(self):
+        """Check if token is revoked.
+        
+        For simplicity, tokens are not revoked by default.
+        In production, you would check a revoked_at field.
+        """
+        return getattr(self, 'revoked', False)
+
+    def get_client_id(self):
+        """Get the client ID associated with this token.
+        
+        This is required by Authlib for OAuth2 token validation.
+        """
+        return self.client_id
+
+    def get_user_id(self):
+        """Get the user ID associated with this token.
+        
+        This is required by Authlib for OAuth2 token validation.
+        """
+        return self.user_id
+
+    def check_client(self, client):
+        """Check if the token belongs to the given client"""
+        return self.client_id == client.client_id
+
+    def get_scope(self):
+        return self.scope
+
+    def get_expires_in(self):
+        """Get remaining expiration time in seconds.
+        
+        Returns the number of seconds until the token expires.
+        Returns 0 if the token is already expired.
+        """
+        remaining = self.expires_at - int(time.time())
+        return max(0, remaining)
+
+    def __repr__(self):
+        return f'<OAuth2Token {self.access_token[:10]}...>'
+

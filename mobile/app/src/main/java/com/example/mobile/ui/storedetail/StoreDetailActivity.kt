@@ -1,17 +1,24 @@
 package com.example.mobile.ui.storedetail
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
 import com.example.mobile.data.network.ApiClient
+import com.example.mobile.ui.auth.LoginActivity
+import com.example.mobile.ui.base.BaseActivity
+import com.example.mobile.ui.cart.CartActivity
 import kotlinx.coroutines.launch
 
-class StoreDetailActivity : AppCompatActivity() {
+class StoreDetailActivity : BaseActivity() {
+
+    // 가게 상세도 공개 화면: 인증 불필요
+    override fun requiresAuth(): Boolean = false
 
     companion object {
         const val EXTRA_STORE_ID = "extra_store_id"
@@ -26,6 +33,8 @@ class StoreDetailActivity : AppCompatActivity() {
     private lateinit var tvMinOrderAndTime: TextView
     private lateinit var rvMenu: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
+    private lateinit var layoutCartButton: android.view.ViewGroup
+    private lateinit var tvCartBadge: TextView
 
     private var storeId: Long = -1L
 
@@ -38,13 +47,10 @@ class StoreDetailActivity : AppCompatActivity() {
         tvStoreStatus = findViewById(R.id.tvDetailStoreStatus)
         tvMinOrderAndTime = findViewById(R.id.tvDetailMinOrderAndTime)
         rvMenu = findViewById(R.id.rvMenuList)
+        layoutCartButton = findViewById(R.id.layoutCartButton)
+        tvCartBadge = findViewById(R.id.tvCartBadge)
 
-        // 리사이클러뷰 세팅
-        menuAdapter = MenuAdapter()
-        rvMenu.layoutManager = LinearLayoutManager(this)
-        rvMenu.adapter = menuAdapter
-
-        // 인텐트에서 값 받기 (목록 화면에서 넘겨준 값)
+        // 인텐트에서 값 받기 (목록 화면에서 넘겨준 값) - 먼저 받아야 함!
         storeId = intent.getLongExtra(EXTRA_STORE_ID, -1L)
         val storeNameFromList = intent.getStringExtra(EXTRA_STORE_NAME) ?: "알 수 없는 가게"
         val statusFromList = intent.getStringExtra(EXTRA_STORE_STATUS) ?: "UNKNOWN"
@@ -54,6 +60,24 @@ class StoreDetailActivity : AppCompatActivity() {
         if (storeId == -1L) {
             finish()
             return
+        }
+
+        // 리사이클러뷰 세팅 - storeId를 받은 후에 생성
+        menuAdapter = MenuAdapter(storeId, lifecycleScope) {
+            // 장바구니 추가 성공 시 콜백
+            updateCartBadge()
+        }
+        rvMenu.layoutManager = LinearLayoutManager(this)
+        rvMenu.adapter = menuAdapter
+
+        // 플로팅 버튼 클릭 리스너
+        layoutCartButton.setOnClickListener {
+            // 장바구니는 보호된 기능이므로, 비로그인 상태면 자연스럽게 로그인으로 유도
+            if (!isLoggedIn()) {
+                startActivity(Intent(this, LoginActivity::class.java))
+                return@setOnClickListener
+            }
+            startActivity(Intent(this, CartActivity::class.java))
         }
 
         // 일단 목록에서 받은 값으로 먼저 보여주고
@@ -69,6 +93,58 @@ class StoreDetailActivity : AppCompatActivity() {
 
         // 🔥 실제 API에서 상세 정보 + 메뉴 목록 불러오기
         loadStoreDetail(storeId)
+        
+        // 장바구니 상태 확인
+        updateCartBadge()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 화면이 다시 보일 때 장바구니 상태 업데이트
+        updateCartBadge()
+    }
+
+    private fun updateCartBadge() {
+        lifecycleScope.launch {
+            try {
+                // 비로그인 상태에서는 장바구니 조회 자체를 하지 않는다 (401 노출 방지)
+                if (!isLoggedIn()) {
+                    tvCartBadge.visibility = View.GONE
+                    layoutCartButton.visibility = View.GONE
+                    return@launch
+                }
+
+                val cart = ApiClient.cartApi.getMyCart()
+                if (cart != null && cart.items.isNotEmpty()) {
+                    val itemCount = cart.items.sumOf { it.quantity }
+                    tvCartBadge.text = itemCount.toString()
+                    tvCartBadge.visibility = View.VISIBLE
+                    layoutCartButton.visibility = View.VISIBLE
+                } else {
+                    tvCartBadge.visibility = View.GONE
+                    layoutCartButton.visibility = View.GONE
+                }
+            } catch (e: retrofit2.HttpException) {
+                if (e.code() == 404) {
+                    // 장바구니가 비어있음
+                    tvCartBadge.visibility = View.GONE
+                    layoutCartButton.visibility = View.GONE
+                } else if (e.code() == 401) {
+                    // 인증 필요: 뱃지/버튼만 숨기고, 사용자 액션(담기/장바구니 버튼)에서 로그인 유도
+                    tvCartBadge.visibility = View.GONE
+                    layoutCartButton.visibility = View.GONE
+                } else {
+                    Log.e("StoreDetailActivity", "장바구니 상태 확인 실패", e)
+                    tvCartBadge.visibility = View.GONE
+                    layoutCartButton.visibility = View.GONE
+                }
+            } catch (e: Exception) {
+                Log.e("StoreDetailActivity", "장바구니 상태 확인 실패", e)
+                // 에러 발생 시에도 버튼은 숨김
+                tvCartBadge.visibility = View.GONE
+                layoutCartButton.visibility = View.GONE
+            }
+        }
     }
 
     private fun loadStoreDetail(storeId: Long) {

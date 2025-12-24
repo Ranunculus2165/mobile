@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:padding="24dp">
+
+    <!-- 앱 아이콘 (쇼핑 카트 아이콘) -->
+    <LinearLayout
+        android:id="@+id/iconContainer"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:background="@drawable/ic_launcher_background"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="80dp">
+
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@android:drawable/ic_menu_info_details"
+            android:tint="@android:color/white" />
+
+    </LinearLayout>
+
+    <!-- 앱 제목 -->
+    <TextView
+        android:id="@+id/tvAppTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="딜리버리 앱"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        app:layout_constraintTop_toBottomOf="@id/iconContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp" />
+
+    <!-- 태그라인 -->
+    <TextView
+        android:id="@+id/tvTagline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="빠르고 맛있는 배달의 시작"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        app:layout_constraintTop_toBottomOf="@id/tvAppTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp" />
+
+    <!-- WhiteHat 로그인 버튼 -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnLoginCustomer"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="WhiteHat으로 로그인하기"
+        android:textColor="#333333"
+        android:textSize="16sp"
+        android:background="@drawable/btn_whitehat_login"
+        android:drawableStart="@drawable/ic_whitehat_logo"
+        android:drawablePadding="12dp"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        app:layout_constraintTop_toBottomOf="@id/tvTagline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="48dp" />
+
+    <!-- 안내 텍스트 -->
+    <TextView
+        android:id="@+id/tvInstruction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="WhiteHat 계정으로 간편하게 로그인하세요"
+        android:textSize="12sp"
+        android:textColor="#999999"
+        app:layout_constraintTop_toBottomOf="@id/btnLoginCustomer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp" />
+
+    <!-- 약관 동의 텍스트 -->
+    <TextView
+        android:id="@+id/tvAgreement"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="로그인하면 서비스 이용약관 및 개인정보 처리방침에 동의하게 됩니다"
+        android:textSize="11sp"
+        android:textColor="#CCCCCC"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="32dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

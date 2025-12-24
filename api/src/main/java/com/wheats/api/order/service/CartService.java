@@ -6,9 +6,12 @@ import com.wheats.api.order.dto.CartResponse;
 import com.wheats.api.order.dto.UpdateCartItemQuantityRequest;
 import com.wheats.api.order.entity.CartEntity;
 import com.wheats.api.order.entity.CartItemEntity;
+import com.wheats.api.order.entity.CartItemStatus;
 import com.wheats.api.order.entity.CartStatus;
+import com.wheats.api.order.exception.CartConflictException;
 import com.wheats.api.order.repository.CartItemRepository;
 import com.wheats.api.order.repository.CartRepository;
+import com.wheats.api.order.repository.OrderRepository;
 import com.wheats.api.store.entity.MenuEntity;
 import com.wheats.api.store.entity.StoreEntity;
 import com.wheats.api.store.repository.MenuRepository;
@@ -26,15 +29,18 @@ public class CartService {
 
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
+    private final OrderRepository orderRepository;
     private final StoreRepository storeRepository;
     private final MenuRepository menuRepository;
 
     public CartService(CartRepository cartRepository,
                        CartItemRepository cartItemRepository,
+                       OrderRepository orderRepository,
                        StoreRepository storeRepository,
                        MenuRepository menuRepository) {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
+        this.orderRepository = orderRepository;
         this.storeRepository = storeRepository;
         this.menuRepository = menuRepository;
     }
@@ -53,27 +59,53 @@ public class CartService {
     }
 
     @Transactional
-    public CartResponse addItem(Long userId, CartItemRequest request) {
+    public CartResponse addItem(Long userId, CartItemRequest request, boolean force) {
         Long storeId = request.getStoreId();
 
-        // user + store 기준 ACTIVE 장바구니 조회 (없으면 새로 생성)
-        CartEntity cart = cartRepository
-                .findFirstByUserIdAndStoreIdAndStatusOrderByCreatedAtDesc(userId, storeId, CartStatus.ACTIVE)
-                .orElseGet(() -> cartRepository.save(new CartEntity(userId, storeId, CartStatus.ACTIVE)));
+        // 규칙:
+        // - 사용자당 ACTIVE 카트는 1개만 허용(서비스 로직으로 보장)
+        // - 다른 매장 담기 시 force=false면 409, force=true면 기존 ACTIVE를 CANCELLED로 전환 후 새 ACTIVE 생성
+        Optional<CartEntity> activeCartOpt = cartRepository.findFirstByUserIdAndStatusOrderByCreatedAtDesc(userId, CartStatus.ACTIVE);
 
-        // 같은 메뉴가 이미 있으면 수량만 증가
-        Optional<CartItemEntity> existed =
-                cartItemRepository.findByCartIdAndMenuId(cart.getId(), request.getMenuId());
+        CartEntity cart;
+        if (activeCartOpt.isPresent()) {
+            CartEntity activeCart = activeCartOpt.get();
+            if (!activeCart.getStoreId().equals(storeId)) {
+                if (!force) {
+                    throw new CartConflictException(buildCartResponse(activeCart));
+                }
+                // 다른 매장 ACTIVE → CANCELLED 전환(삭제 금지)
+                activeCart.setStatus(CartStatus.CANCELLED);
+                cartRepository.save(activeCart);
+                cartRepository.flush();
+                // 기존 카트의 아이템도 CANCELLED 처리(조회에서 제외되도록 상태 동기화)
+                cartItemRepository.updateStatusByCartId(activeCart.getId(), CartItemStatus.CANCELLED);
+
+                // 새 ACTIVE 생성
+                cart = cartRepository.save(new CartEntity(userId, storeId, CartStatus.ACTIVE));
+            } else {
+                cart = activeCart;
+            }
+        } else {
+            cart = cartRepository.save(new CartEntity(userId, storeId, CartStatus.ACTIVE));
+        }
+
+        // 4. 메뉴 추가 로직
+        Optional<CartItemEntity> existed = cartItemRepository.findByCartIdAndMenuIdAndStatus(
+                cart.getId(), request.getMenuId(), CartItemStatus.ACTIVE
+        );
 
         if (existed.isPresent()) {
             CartItemEntity item = existed.get();
             item.setQuantity(item.getQuantity() + request.getQuantity());
             cartItemRepository.save(item);
         } else {
-            CartItemEntity newItem =
-                    new CartItemEntity(cart.getId(), request.getMenuId(), request.getQuantity());
+            CartItemEntity newItem = new CartItemEntity(cart.getId(), request.getMenuId(), request.getQuantity());
             cartItemRepository.save(newItem);
         }
+
+        // 5. 최종 응답 빌드 전 영속성 반영
+        cartItemRepository.flush();
 
         return buildCartResponse(cart);
     }
@@ -95,7 +127,9 @@ public class CartService {
 
         int newQuantity = request.getQuantity();
         if (newQuantity <= 0) {
-            cartItemRepository.delete(item);
+            item.setStatus(CartItemStatus.CANCELLED);
+            item.setQuantity(0);
+            cartItemRepository.save(item);
         } else {
             item.setQuantity(newQuantity);
             cartItemRepository.save(item);
@@ -116,7 +150,9 @@ public class CartService {
             throw new IllegalStateException("You cannot modify another user's cart.");
         }
 
-        cartItemRepository.delete(item);
+        item.setStatus(CartItemStatus.CANCELLED);
+        item.setQuantity(0);
+        cartItemRepository.save(item);
 
         return buildCartResponse(cart);
     }
@@ -125,7 +161,7 @@ public class CartService {
         StoreEntity store = storeRepository.findById(cart.getStoreId())
                 .orElseThrow(() -> new NoSuchElementException("Store not found. id=" + cart.getStoreId()));
 
-        List<CartItemEntity> items = cartItemRepository.findByCartId(cart.getId());
+        List<CartItemEntity> items = cartItemRepository.findByCartIdAndStatus(cart.getId(), CartItemStatus.ACTIVE);
 
         List<CartItemResponse> itemResponses = items.stream()
                 .map(it -> {

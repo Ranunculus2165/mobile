@@ -25,6 +25,11 @@ dependencies {
     // ⭐ MySQL 드라이버 - 버전 X, Spring Boot BOM이 관리
     runtimeOnly("com.mysql:mysql-connector-j")
 
+    // JWT 라이브러리
+    implementation("io.jsonwebtoken:jjwt-api:0.12.3")
+    implementation("io.jsonwebtoken:jjwt-impl:0.12.3")
+    implementation("io.jsonwebtoken:jjwt-jackson:0.12.3")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 

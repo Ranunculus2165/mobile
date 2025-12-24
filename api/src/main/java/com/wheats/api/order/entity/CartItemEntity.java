@@ -19,6 +19,10 @@ public class CartItemEntity {
     @Column(nullable = false)
     private int quantity;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private CartItemStatus status = CartItemStatus.ACTIVE;
+
     protected CartItemEntity() {
     }
 
@@ -26,6 +30,7 @@ public class CartItemEntity {
         this.cartId = cartId;
         this.menuId = menuId;
         this.quantity = quantity;
+        this.status = CartItemStatus.ACTIVE;
     }
 
     public Long getId() {
@@ -46,5 +51,13 @@ public class CartItemEntity {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public CartItemStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(CartItemStatus status) {
+        this.status = status;
     }
 }

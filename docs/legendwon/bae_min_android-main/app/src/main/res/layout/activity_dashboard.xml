@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="대시보드"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:id="@+id/tvScope"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Current Scope: unknown"
+            android:textSize="16sp"
+            android:padding="12dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="API 테스트"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/btnTestCustomerAPI"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="고객 API 호출\n(Customer Orders)"
+            android:layout_marginBottom="12dp"
+            android:padding="16dp" />
+
+        <Button
+            android:id="@+id/btnTestStoreAPI"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🚨 점주 API 호출\n(Store Dashboard - Privileged)"
+            android:backgroundTint="#FF9800"
+            android:layout_marginBottom="24dp"
+            android:padding="16dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="API 응답 결과:"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvApiResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="API 버튼을 눌러 테스트하세요"
+            android:padding="16dp"
+            android:background="#F5F5F5"
+            android:fontFamily="monospace"
+            android:textSize="12sp"
+            android:layout_marginBottom="24dp"
+            android:minHeight="200dp" />
+
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="로그아웃"
+            android:backgroundTint="#757575"
+            android:padding="16dp" />
+
+    </LinearLayout>
+
+</ScrollView>
