@@ -112,6 +112,8 @@ class OrderActivity : BaseActivity() {
                     finish()
                     return@launch
                 }
+                // ✅ 보유 포인트는 주문 단계에서도 'DB 최신값'을 기준으로 반드시 세팅해야 함
+                availablePoint = myPageResponse.point
 
                 // 배달료 정보 설정
                 if (storeDetail != null) {
