@@ -151,8 +151,8 @@ public class OrderService {
         // 9) 장바구니 아이템들 삭제
         cartItemRepository.deleteAll(cartItems);
 
-        // 10) 장바구니 상태를 ABANDONED로 변경 (삭제 대신 상태 변경으로 유니크 제약조건 문제 방지)
-        cart.setStatus(CartStatus.ABANDONED);
+        // 10) 주문이 완료된 장바구니는 ORDERED로 변경 (orders.cart_id가 참조하므로 삭제 금지)
+        cart.setStatus(CartStatus.ORDERED);
         cartRepository.save(cart);
 
         // 11) 응답 DTO로 변환
