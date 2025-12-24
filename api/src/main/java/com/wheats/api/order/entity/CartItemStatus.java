@@ -1,7 +1,9 @@
 package com.wheats.api.order.entity;
 
-public enum CartStatus {
+public enum CartItemStatus {
     ACTIVE,
     ORDERED,
     CANCELLED
 }
+
+

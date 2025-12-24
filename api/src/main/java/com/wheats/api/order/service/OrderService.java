@@ -8,6 +8,7 @@ import com.wheats.api.order.dto.OrderRequest;
 import com.wheats.api.order.dto.OrderResponse;
 import com.wheats.api.order.entity.CartEntity;
 import com.wheats.api.order.entity.CartItemEntity;
+import com.wheats.api.order.entity.CartItemStatus;
 import com.wheats.api.order.entity.CartStatus;
 import com.wheats.api.order.entity.OrderEntity;
 import com.wheats.api.order.entity.OrderItemEntity;
@@ -75,7 +76,7 @@ public class OrderService {
         }
 
         // 2) 카트 아이템 조회
-        List<CartItemEntity> cartItems = cartItemRepository.findByCartId(cartId);
+        List<CartItemEntity> cartItems = cartItemRepository.findByCartIdAndStatus(cartId, CartItemStatus.ACTIVE);
         if (cartItems.isEmpty()) {
             throw new IllegalStateException("장바구니에 담긴 상품이 없습니다.");
         }
@@ -148,10 +149,10 @@ public class OrderService {
         }
         orderItemRepository.saveAll(orderItems);
 
-        // 9) 장바구니 아이템들 삭제
-        cartItemRepository.deleteAll(cartItems);
-
-        // 10) 주문이 완료된 장바구니는 ORDERED로 변경 (orders.cart_id가 참조하므로 삭제 금지)
+        // 9) 장바구니/아이템은 삭제하지 않는다.
+        //    - CartItem은 ORDERED로 상태 전환하여 주문 이력 보존
+        //    - Cart는 ORDERED로 상태 전환하여 주문 이력 보존
+        cartItemRepository.updateStatusByCartId(cartId, CartItemStatus.ORDERED);
         cart.setStatus(CartStatus.ORDERED);
         cartRepository.save(cart);
 

@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS carts (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   user_id BIGINT NOT NULL,
   store_id BIGINT NOT NULL,
-  status ENUM('ACTIVE', 'ORDERED', 'ABANDONED') NOT NULL DEFAULT 'ACTIVE',
+  status ENUM('ACTIVE', 'ORDERED', 'CANCELLED') NOT NULL DEFAULT 'ACTIVE',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_carts_user
@@ -74,8 +74,11 @@ CREATE TABLE IF NOT EXISTS carts (
     FOREIGN KEY (store_id) REFERENCES stores(id)
     ON DELETE CASCADE,
   KEY idx_carts_user (user_id),
+  KEY idx_carts_user_status (user_id, status),
   KEY idx_carts_store (store_id),
-  UNIQUE KEY uk_carts_user_store_active (user_id, store_id, status)
+  -- NOTE: 주문 이력(ORDERED) 누적을 허용하기 위해 유니크 제약 제거
+  -- (동시 ACTIVE 1개 보장은 서비스 로직으로 관리)
+  KEY idx_carts_user_store_status (user_id, store_id, status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 장바구니 아이템 테이블
@@ -84,13 +87,15 @@ CREATE TABLE IF NOT EXISTS cart_items (
   cart_id BIGINT NOT NULL,
   menu_id BIGINT NOT NULL,
   quantity INT NOT NULL,
+  status ENUM('ACTIVE', 'ORDERED', 'CANCELLED') NOT NULL DEFAULT 'ACTIVE',
   CONSTRAINT fk_cart_items_cart
     FOREIGN KEY (cart_id) REFERENCES carts(id)
     ON DELETE CASCADE,
   CONSTRAINT fk_cart_items_menu
     FOREIGN KEY (menu_id) REFERENCES menus(id)
     ON DELETE CASCADE,
-  KEY idx_cart_items_cart (cart_id)
+  KEY idx_cart_items_cart (cart_id),
+  KEY idx_cart_items_cart_status (cart_id, status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 주문 테이블

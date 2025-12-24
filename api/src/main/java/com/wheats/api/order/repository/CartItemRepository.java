@@ -1,6 +1,7 @@
 package com.wheats.api.order.repository;
 
 import com.wheats.api.order.entity.CartItemEntity;
+import com.wheats.api.order.entity.CartItemStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,12 +12,12 @@ import java.util.Optional;
 
 public interface CartItemRepository extends JpaRepository<CartItemEntity, Long> {
 
-    List<CartItemEntity> findByCartId(Long cartId);
+    List<CartItemEntity> findByCartIdAndStatus(Long cartId, CartItemStatus status);
 
-    Optional<CartItemEntity> findByCartIdAndMenuId(Long cartId, Long menuId);
+    Optional<CartItemEntity> findByCartIdAndMenuIdAndStatus(Long cartId, Long menuId, CartItemStatus status);
 
-    // 벌크 삭제 (더 효율적)
+    // 벌크 "소프트 삭제"(상태 업데이트)
     @Modifying
-    @Query("DELETE FROM CartItemEntity c WHERE c.cartId = :cartId")
-    void deleteAllByCartId(@Param("cartId") Long cartId);
+    @Query("UPDATE CartItemEntity c SET c.status = :status WHERE c.cartId = :cartId")
+    int updateStatusByCartId(@Param("cartId") Long cartId, @Param("status") CartItemStatus status);
 }
