@@ -305,6 +305,13 @@ def oauth_login():
 # OAuth 2.0 Authorization Endpoint
 @app.route('/oauth/authorize', methods=['GET', 'POST'])
 def authorize():
+    # prompt=login 이면 "세션이 남아있더라도" 무조건 로그인 화면을 다시 보여줘야 한다.
+    # (CustomTabs/Chrome 쿠키에 OAuth 서버 세션이 남아있으면 앱 로그아웃(토큰 삭제)만으로는
+    #  서버 로그인 상태가 유지되어 Approve 화면으로 바로 넘어가는 현상이 발생할 수 있음)
+    if request.args.get('prompt') == 'login':
+        session.pop('user_id', None)
+        print("🔓 Force login (authorize): Session cleared")
+
     # Get current user from session
     user_id = session.get('user_id')
     if not user_id:
