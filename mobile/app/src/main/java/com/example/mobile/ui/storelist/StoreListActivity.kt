@@ -2,6 +2,8 @@ package com.example.mobile.ui.storelist
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.ImageButton
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +21,10 @@ class StoreListActivity : BaseActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: StoreListAdapter
+    private lateinit var btnReload: ImageButton
+    private lateinit var pbReload: ProgressBar
+
+    private var isLoading = false
 
     // 코루틴 스코프 (Activity 생명주기 따라가게)
     private val job = SupervisorJob()
@@ -33,6 +39,9 @@ class StoreListActivity : BaseActivity() {
         setContentView(R.layout.activity_store_list)
 
         recyclerView = findViewById(R.id.rvStoreList)
+        btnReload = findViewById(R.id.btnReload)
+        pbReload = findViewById(R.id.pbReload)
+
         adapter = StoreListAdapter { store ->
             openStoreDetail(store)
         }
@@ -40,24 +49,32 @@ class StoreListActivity : BaseActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
+        // 새로고침 버튼: API 지연/실패 시 사용자가 직접 재조회 가능
+        btnReload.setOnClickListener {
+            loadStoresFromApi(force = true)
+        }
+
         // ★ API로 목록 불러오기
-        loadStoresFromApi()
+        loadStoresFromApi(force = false)
     }
 
-    private fun loadStoresFromApi() {
+    private fun setLoading(loading: Boolean) {
+        isLoading = loading
+        btnReload.isEnabled = !loading
+        pbReload.visibility = if (loading) android.view.View.VISIBLE else android.view.View.GONE
+        // 아이콘과 로딩이 겹치지 않게: 로딩 중에는 아이콘을 숨김
+        btnReload.alpha = if (loading) 0.25f else 1.0f
+    }
+
+    private fun loadStoresFromApi(force: Boolean) {
+        if (isLoading) return
+        setLoading(true)
+
         uiScope.launch {
             try {
                 // 네트워크는 IO 스레드에서
                 val stores: List<Store> = withContext(Dispatchers.IO) {
                     ApiClient.storeApi.getStores()
-                }
-
-                if (stores.isEmpty()) {
-                    Toast.makeText(
-                        this@StoreListActivity,
-                        "가게 목록이 비어 있습니다.",
-                        Toast.LENGTH_SHORT
-                    ).show()
                 }
 
                 adapter.submitList(stores)
@@ -69,6 +86,8 @@ class StoreListActivity : BaseActivity() {
                     "가게 목록을 불러오는데 실패했습니다.",
                     Toast.LENGTH_SHORT
                 ).show()
+            } finally {
+                setLoading(false)
             }
         }
     }

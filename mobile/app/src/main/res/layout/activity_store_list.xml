@@ -14,7 +14,34 @@
         android:padding="16dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnReload" />
+
+    <!-- 새로고침 버튼 (API 지연/실패 시 재조회 용) -->
+    <ImageButton
+        android:id="@+id/btnReload"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginEnd="8dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="새로고침"
+        android:padding="10dp"
+        android:src="@android:drawable/ic_popup_sync"
+        android:tint="#0F172A"
+        app:layout_constraintTop_toTopOf="@id/tvTitle"
+        app:layout_constraintBottom_toBottomOf="@id/tvTitle"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 로딩 표시(새로고침 중) -->
+    <ProgressBar
+        android:id="@+id/pbReload"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/btnReload"
+        app:layout_constraintBottom_toBottomOf="@id/btnReload"
+        app:layout_constraintStart_toStartOf="@id/btnReload"
+        app:layout_constraintEnd_toEndOf="@id/btnReload" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvStoreList"
