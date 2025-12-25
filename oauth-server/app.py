@@ -350,26 +350,232 @@ LOGIN_TEMPLATE = '''
 </html>
 '''
 
-# Simple HTML template for authorization page
+# Responsive HTML template for authorization page (mobile-friendly)
 AUTHORIZE_TEMPLATE = '''
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="ko">
 <head>
-    <title>Authorize</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; }
-        .btn { width: 100%; padding: 10px; margin: 10px 0; cursor: pointer; background-color: #4CAF50; color: white; border: none; }
-        .btn-deny { background-color: #f44336; }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>권한 요청</title>
+  <style>
+    :root{
+      --bg: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: #e5e7eb;
+      --primary: #12b6a6;
+      --primary-press: #0ea398;
+      --danger: #ef4444;
+      --danger-press: #dc2626;
+      --card: #0b1220;
+      --radius: 16px;
+      --shadow: 0 10px 24px rgba(2, 6, 23, .12);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR",
+                   "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .page{
+      min-height: 100dvh;
+      display:flex;
+      flex-direction:column;
+      padding: 14px 16px 28px;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      height: 44px;
+    }
+    .back{
+      width: 36px;
+      height: 36px;
+      display:grid;
+      place-items:center;
+      border:0;
+      background: transparent;
+      color: var(--text);
+      border-radius: 10px;
+      cursor:pointer;
+    }
+    .back:active{ background: rgba(15, 23, 42, .06); }
+    .topbar-title{
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+    }
+
+    .content{
+      flex: 1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      padding-top: 22px;
+    }
+
+    .logo{
+      width: 76px;
+      height: 76px;
+      border-radius: 20px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      display:grid;
+      place-items:center;
+      margin-bottom: 16px;
+    }
+
+    .title{
+      font-size: 20px;
+      font-weight: 900;
+      margin: 0 0 6px;
+      letter-spacing: -0.3px;
+      text-align:center;
+    }
+    .desc{
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      text-align:center;
+    }
+
+    .card{
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      background: #fff;
+    }
+    .row{
+      display:flex;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(229,231,235,.7);
+    }
+    .row:last-child{ border-bottom: 0; }
+    .k{
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      white-space: nowrap;
+    }
+    .v{
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      text-align:right;
+      word-break: break-word;
+      max-width: 68%;
+    }
+    .scope{
+      display:inline-block;
+      font-weight: 800;
+      color: #0f172a;
+      background: rgba(18,182,166,.10);
+      border: 1px solid rgba(18,182,166,.25);
+      padding: 6px 10px;
+      border-radius: 999px;
+    }
+
+    .actions{
+      width: 100%;
+      margin-top: 18px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+    .btn{
+      width:100%;
+      height: 54px;
+      border-radius: 14px;
+      border: 0;
+      font-weight: 900;
+      font-size: 16px;
+      letter-spacing: -0.2px;
+      cursor:pointer;
+    }
+    .btn-approve{
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-approve:active{ background: var(--primary-press); }
+    .btn-deny{
+      background: #fff;
+      color: var(--danger);
+      border: 1px solid rgba(239,68,68,.35);
+    }
+    .btn-deny:active{ background: rgba(239,68,68,.06); border-color: rgba(239,68,68,.55); }
+
+    .footer{
+      text-align:center;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      line-height: 1.45;
+      padding-top: 18px;
+    }
+
+    @media (max-width: 360px){
+      .title{ font-size: 18px; }
+      .logo{ width: 70px; height: 70px; }
+      .btn{ height: 52px; }
+    }
+  </style>
 </head>
 <body>
-    <h2>Authorization Request</h2>
-    <p><strong>{{ client.client_name }}</strong> is requesting access to your account.</p>
-    <p><strong>Scope:</strong> {{ scope }}</p>
-    <form method="post">
-        <button type="submit" name="confirm" value="yes" class="btn">Approve</button>
-        <button type="submit" name="confirm" value="no" class="btn btn-deny">Deny</button>
-    </form>
+  <div class="page">
+    <div class="topbar">
+      <button class="back" type="button" aria-label="뒤로가기" onclick="history.back()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="topbar-title">권한 요청</div>
+    </div>
+
+    <div class="content">
+      <div class="logo" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2l8 4v6c0 5-3.4 9.4-8 10-4.6-.6-8-5-8-10V6l8-4z" fill="#ffffff" opacity="0.95"/>
+          <path d="M12 4.2l-6 3v4.8c0 3.9 2.5 7.4 6 8 3.5-.6 6-4.1 6-8V7.2l-6-3z" fill="#0b1220" opacity="0.35"/>
+        </svg>
+      </div>
+
+      <h1 class="title">접근 권한 요청</h1>
+      <p class="desc">아래 앱이 계정 정보에 접근하려고 합니다.</p>
+
+      <div class="card" role="region" aria-label="권한 요청 상세">
+        <div class="row">
+          <div class="k">앱</div>
+          <div class="v">{{ client.client_name }}</div>
+        </div>
+        <div class="row">
+          <div class="k">요청 권한</div>
+          <div class="v"><span class="scope">{{ scope }}</span></div>
+        </div>
+      </div>
+
+      <form method="post" class="actions">
+        <button type="submit" name="confirm" value="yes" class="btn btn-approve">승인</button>
+        <button type="submit" name="confirm" value="no" class="btn btn-deny">거부</button>
+      </form>
+    </div>
+
+    <div class="footer">
+      승인하면 요청한 범위(scope) 내에서 접근이 허용됩니다.<br/>
+      원치 않으면 거부를 선택하세요.
+    </div>
+  </div>
 </body>
 </html>
 '''
