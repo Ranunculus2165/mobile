@@ -11,29 +11,33 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp"
         android:background="#FFFFFF"
         android:gravity="center_vertical"
+        android:paddingHorizontal="6dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageButton
             android:id="@+id/btnBack"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@android:drawable/ic_menu_revert"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_arrow_back_24"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="뒤로 가기"
-            android:padding="12dp" />
+            android:padding="8dp"
+            android:tint="#111827" />
 
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="문의 상세"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:textStyle="bold"
+            android:textColor="#111827"
             android:layout_weight="1"
             android:gravity="center" />
     </LinearLayout>

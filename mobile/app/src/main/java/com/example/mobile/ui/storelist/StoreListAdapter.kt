@@ -40,11 +40,31 @@ class StoreListAdapter(
     ) : RecyclerView.ViewHolder(itemView) {
 
         private val tvName: TextView = itemView.findViewById(R.id.tvStoreName)
+        private val tvStatus: TextView = itemView.findViewById(R.id.tvStoreStatus)
         private val tvEta: TextView = itemView.findViewById(R.id.tvStoreMinOrder)
         private val tvDeliveryFee: TextView = itemView.findViewById(R.id.tvStoreDeliveryFee)
 
         fun bind(item: Store) {
             tvName.text = item.name
+
+            // 영업 상태 배지
+            when (item.status) {
+                "OPEN" -> {
+                    tvStatus.text = "영업중"
+                    tvStatus.setTextColor(0xFF0F766E.toInt())
+                    tvStatus.setBackgroundResource(R.drawable.bg_store_status_open)
+                }
+                "PREPARING" -> {
+                    tvStatus.text = "준비중"
+                    tvStatus.setTextColor(0xFFF97316.toInt())
+                    tvStatus.setBackgroundResource(R.drawable.bg_store_status_closed)
+                }
+                else -> { // CLOSED 등
+                    tvStatus.text = "영업종료"
+                    tvStatus.setTextColor(0xFFF97316.toInt())
+                    tvStatus.setBackgroundResource(R.drawable.bg_store_status_closed)
+                }
+            }
 
             // (CTF/데모) 배달 예상 시간은 더미로 표시
             tvEta.text = "25-35분"
