@@ -99,6 +99,7 @@ class StoreListActivity : BaseActivity() {
             putExtra(StoreDetailActivity.EXTRA_STORE_STATUS, store.status)
             putExtra(StoreDetailActivity.EXTRA_STORE_MIN_ORDER, store.minOrderPrice)
             putExtra(StoreDetailActivity.EXTRA_STORE_TIME, "약 30~40분" )
+            putExtra(StoreDetailActivity.EXTRA_STORE_DELIVERY_FEE, store.deliveryTip)
         }
         startActivity(intent)
     }

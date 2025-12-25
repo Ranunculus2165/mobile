@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import android.widget.ImageButton
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,15 +27,18 @@ class StoreDetailActivity : BaseActivity() {
         const val EXTRA_STORE_STATUS = "extra_store_status"
         const val EXTRA_STORE_MIN_ORDER = "extra_store_min_order"
         const val EXTRA_STORE_TIME = "extra_store_time"
+        const val EXTRA_STORE_DELIVERY_FEE = "extra_store_delivery_fee"
     }
 
     private lateinit var tvStoreName: TextView
     private lateinit var tvStoreStatus: TextView
-    private lateinit var tvMinOrderAndTime: TextView
+    private lateinit var tvEta: TextView
+    private lateinit var tvDeliveryFee: TextView
     private lateinit var rvMenu: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
     private lateinit var layoutCartButton: android.view.ViewGroup
     private lateinit var tvCartBadge: TextView
+    private lateinit var btnBack: ImageButton
 
     private var storeId: Long = -1L
 
@@ -45,17 +49,21 @@ class StoreDetailActivity : BaseActivity() {
         // View 연결
         tvStoreName = findViewById(R.id.tvDetailStoreName)
         tvStoreStatus = findViewById(R.id.tvDetailStoreStatus)
-        tvMinOrderAndTime = findViewById(R.id.tvDetailMinOrderAndTime)
+        tvEta = findViewById(R.id.tvDetailEta)
+        tvDeliveryFee = findViewById(R.id.tvDetailDeliveryFee)
         rvMenu = findViewById(R.id.rvMenuList)
         layoutCartButton = findViewById(R.id.layoutCartButton)
         tvCartBadge = findViewById(R.id.tvCartBadge)
+        btnBack = findViewById(R.id.btnBack)
+
+        btnBack.setOnClickListener { finish() }
 
         // 인텐트에서 값 받기 (목록 화면에서 넘겨준 값) - 먼저 받아야 함!
         storeId = intent.getLongExtra(EXTRA_STORE_ID, -1L)
         val storeNameFromList = intent.getStringExtra(EXTRA_STORE_NAME) ?: "알 수 없는 가게"
         val statusFromList = intent.getStringExtra(EXTRA_STORE_STATUS) ?: "UNKNOWN"
-        val minOrderFromList = intent.getIntExtra(EXTRA_STORE_MIN_ORDER, 0)
         val time = intent.getStringExtra(EXTRA_STORE_TIME) ?: ""
+        val deliveryFromList = intent.getIntExtra(EXTRA_STORE_DELIVERY_FEE, -1)
 
         if (storeId == -1L) {
             finish()
@@ -88,8 +96,12 @@ class StoreDetailActivity : BaseActivity() {
             "PREPARING" -> "준비 중"
             else -> "상태 알 수 없음"
         }
-        val minOrderText = String.format("최소주문 %,d원", minOrderFromList)
-        tvMinOrderAndTime.text = "$minOrderText · $time"
+        tvEta.text = time.ifBlank { "25-35분" }
+        tvDeliveryFee.text = when {
+            deliveryFromList == 0 -> "배달비 무료"
+            deliveryFromList > 0 -> String.format("배달비 %,d원", deliveryFromList)
+            else -> "배달비 -"
+        }
 
         // 🔥 실제 API에서 상세 정보 + 메뉴 목록 불러오기
         loadStoreDetail(storeId)
@@ -163,12 +175,10 @@ class StoreDetailActivity : BaseActivity() {
                     "PREPARING" -> "준비 중"
                     else -> "상태 알 수 없음"
                 }
-                val minOrderText = String.format("최소주문 %,d원", store.minOrderPrice)
-                // 시간 정보는 서버에 없으니 인텐트에서 받은 time 그대로 유지
-                val currentText = tvMinOrderAndTime.text.toString()
-                // "최소주문 ~원 · ~" 형식 유지
-                tvMinOrderAndTime.text = currentText.replace(Regex("최소주문 .*원")) {
-                    minOrderText
+                tvDeliveryFee.text = if (store.deliveryTip <= 0) {
+                    "배달비 무료"
+                } else {
+                    String.format("배달비 %,d원", store.deliveryTip)
                 }
 
                 // ✅ 여기에서 진짜 DB 메뉴 목록을 어댑터에 넣어줌
