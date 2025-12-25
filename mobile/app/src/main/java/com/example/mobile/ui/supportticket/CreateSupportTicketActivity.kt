@@ -133,11 +133,6 @@ class CreateSupportTicketActivity : BaseActivity() {
                 }
 
                 if (response.isSuccessful) {
-                    Toast.makeText(
-                        this@CreateSupportTicketActivity,
-                        "문의가 등록되었습니다.",
-                        Toast.LENGTH_SHORT
-                    ).show()
                     finish()
                 } else {
                     Toast.makeText(

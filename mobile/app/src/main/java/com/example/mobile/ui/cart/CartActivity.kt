@@ -81,11 +81,7 @@ class CartActivity : BaseActivity() {
                     tvTotalPrice.text = String.format("%,d원", cartData.totalPrice)
                     cartAdapter.submitList(cartData.items)
                 } else {
-                    Toast.makeText(
-                        this@CartActivity,
-                        "장바구니가 비어있습니다",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    // 정보성 토스트는 제거: 장바구니가 비어있으면 조용히 종료
                     finish()
                 }
             } catch (e: retrofit2.HttpException) {
@@ -151,21 +147,13 @@ class CartActivity : BaseActivity() {
                     cartAdapter.submitList(updatedCart.items)
                 } else {
                     // 장바구니가 비어있으면 종료
-                    Toast.makeText(
-                        this@CartActivity,
-                        "장바구니가 비어있습니다",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    // 정보성 토스트는 제거: 장바구니가 비어있으면 조용히 종료
                     finish()
                 }
             } catch (e: retrofit2.HttpException) {
                 if (e.code() == 404) {
                     // 장바구니가 비어있음
-                    Toast.makeText(
-                        this@CartActivity,
-                        "장바구니가 비어있습니다",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    // 정보성 토스트는 제거: 장바구니가 비어있으면 조용히 종료
                     finish()
                 } else {
                     Log.e("CartActivity", "장바구니 항목 삭제 실패", e)

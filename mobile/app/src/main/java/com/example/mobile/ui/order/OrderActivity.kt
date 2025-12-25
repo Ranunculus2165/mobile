@@ -206,13 +206,6 @@ class OrderActivity : BaseActivity() {
 
                     val response = ApiClient.orderApi.createOrder(request)
 
-                    // 주문 성공
-                    Toast.makeText(
-                        this@OrderActivity,
-                        "주문이 완료되었습니다!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
                     // 주문 완료 후 홈 화면으로 이동
                     val intent = Intent(this@OrderActivity, StoreListActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
