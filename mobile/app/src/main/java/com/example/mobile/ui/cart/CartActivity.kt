@@ -17,16 +17,23 @@ import com.example.mobile.ui.base.BaseActivity
 import com.example.mobile.ui.order.OrderActivity
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 
 class CartActivity : BaseActivity() {
 
     private lateinit var tvStoreName: TextView
     private lateinit var tvTotalPrice: TextView
+    private lateinit var tvOrderAmount: TextView
+    private lateinit var tvDeliveryFee: TextView
     private lateinit var rvCartItems: RecyclerView
     private lateinit var cartAdapter: CartAdapter
     private lateinit var btnOrder: Button
 
     private var cart: CartResponse? = null
+    private var lastDeliveryFee: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +42,8 @@ class CartActivity : BaseActivity() {
         // View 연결
         tvStoreName = findViewById(R.id.tvCartStoreName)
         tvTotalPrice = findViewById(R.id.tvCartTotalPrice)
+        tvOrderAmount = findViewById(R.id.tvCartOrderAmount)
+        tvDeliveryFee = findViewById(R.id.tvCartDeliveryFee)
         rvCartItems = findViewById(R.id.rvCartItems)
         btnOrder = findViewById(R.id.btnOrder)
 
@@ -74,12 +83,29 @@ class CartActivity : BaseActivity() {
     private fun loadCart() {
         lifecycleScope.launch {
             try {
+                // 장바구니 + (선택) 가게 배달비를 함께 조회해서 하단 요약을 채운다.
                 val cartData = ApiClient.cartApi.getMyCart()
                 if (cartData != null) {
                     cart = cartData
                     tvStoreName.text = cartData.storeName
-                    tvTotalPrice.text = String.format("%,d원", cartData.totalPrice)
                     cartAdapter.submitList(cartData.items)
+
+                    // 배달비는 storeId 기반으로 가게 상세에서 조회
+                    val deliveryFee = try {
+                        withContext(Dispatchers.IO) {
+                            ApiClient.storeApi.getStoreDetail(cartData.storeId).store.deliveryTip
+                        }
+                    } catch (e: Exception) {
+                        0
+                    }
+                    lastDeliveryFee = deliveryFee
+
+                    // 하단 요약 업데이트
+                    val orderAmount = cartData.totalPrice
+                    val totalPay = orderAmount + deliveryFee
+                    tvOrderAmount.text = String.format("%,d원", orderAmount)
+                    tvDeliveryFee.text = if (deliveryFee <= 0) "0원" else String.format("%,d원", deliveryFee)
+                    tvTotalPrice.text = String.format("%,d원", totalPay)
                 } else {
                     // 정보성 토스트는 제거: 장바구니가 비어있으면 조용히 종료
                     finish()
