@@ -85,30 +85,267 @@ def handle_unauthorized(e):
     }), 401
 
 
-# Simple HTML template for login page
+# Responsive HTML template for login page (mobile-friendly)
 LOGIN_TEMPLATE = '''
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="ko">
 <head>
-    <title>Login</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; }
-        input { width: 100%; padding: 10px; margin: 5px 0; box-sizing: border-box; }
-        .btn { width: 100%; padding: 10px; margin: 10px 0; cursor: pointer; background-color: #4CAF50; color: white; border: none; }
-        .error { color: red; }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>WhiteHat 로그인</title>
+  <style>
+    :root{
+      --bg: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: #e5e7eb;
+      --primary: #12b6a6; /* 이미지의 그린 톤 */
+      --primary-press: #0ea398;
+      --card: #0b1220;    /* 로고 배경 네이비 */
+      --danger: #ef4444;
+      --radius: 16px;
+      --shadow: 0 10px 24px rgba(2, 6, 23, .12);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR",
+                   "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .page{
+      min-height: 100dvh;
+      display:flex;
+      flex-direction:column;
+      padding: 14px 16px 28px;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    /* Top bar */
+    .topbar{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      height: 44px;
+    }
+    .back{
+      width: 36px;
+      height: 36px;
+      display:grid;
+      place-items:center;
+      border:0;
+      background: transparent;
+      color: var(--text);
+      border-radius: 10px;
+      cursor:pointer;
+    }
+    .back:active{ background: rgba(15, 23, 42, .06); }
+    .topbar-title{
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+
+    /* Center header */
+    .hero{
+      flex: 1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      padding-top: 26px;
+    }
+    .logo{
+      width: 88px;
+      height: 88px;
+      border-radius: 22px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      display:grid;
+      place-items:center;
+      margin-bottom: 18px;
+    }
+    .brand{
+      font-size: 22px;
+      font-weight: 800;
+      margin: 0;
+      letter-spacing: -0.3px;
+    }
+    .subtitle{
+      margin: 6px 0 26px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+
+    /* Form */
+    .form{
+      width: 100%;
+      margin-top: 8px;
+    }
+    .field{
+      margin-bottom: 18px;
+    }
+    .label{
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: -0.2px;
+    }
+    .control{
+      position: relative;
+    }
+    .input{
+      width: 100%;
+      height: 52px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      outline: none;
+      font-size: 16px;
+      background: #fff;
+    }
+    .input:focus{
+      border-color: rgba(18,182,166,.65);
+      box-shadow: 0 0 0 4px rgba(18,182,166,.15);
+    }
+
+    .toggle{
+      position:absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      display:grid;
+      place-items:center;
+      color: var(--muted);
+    }
+    .toggle:active{ background: rgba(100,116,139,.10); }
+
+    .btn{
+      width:100%;
+      height: 54px;
+      border-radius: 14px;
+      border: 0;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -0.2px;
+      cursor:pointer;
+      margin-top: 6px;
+    }
+    .btn:active{ background: var(--primary-press); }
+
+    .error{
+      margin: 10px 0 0;
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    .footer{
+      text-align:center;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      line-height: 1.45;
+      padding-top: 18px;
+    }
+    .test{
+      margin-top: 10px;
+      color: rgba(100,116,139,.85);
+      font-weight: 600;
+      font-size: 12px;
+      text-align:center;
+    }
+    @media (max-width: 360px){
+      .brand{ font-size: 20px; }
+      .logo{ width: 80px; height: 80px; }
+      .input{ height: 50px; }
+      .btn{ height: 52px; }
+    }
+  </style>
 </head>
 <body>
-    <h2>Login</h2>
-    {% if error %}
-    <p class="error">{{ error }}</p>
-    {% endif %}
-    <form method="post">
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit" class="btn">Login</button>
-    </form>
-    <p><small>Test accounts: customer1/password123 or storeowner1/password123</small></p>
+  <div class="page">
+    <div class="topbar">
+      <button class="back" type="button" aria-label="뒤로가기" onclick="history.back()">
+        <!-- iOS 스타일 화살표 -->
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="topbar-title">WhiteHat 로그인</div>
+    </div>
+
+    <div class="hero">
+      <div class="logo" aria-hidden="true">
+        <!-- 간단한 방패 로고(SVG) -->
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2l8 4v6c0 5-3.4 9.4-8 10-4.6-.6-8-5-8-10V6l8-4z" fill="#ffffff" opacity="0.95"/>
+          <path d="M12 4.2l-6 3v4.8c0 3.9 2.5 7.4 6 8 3.5-.6 6-4.1 6-8V7.2l-6-3z" fill="#0b1220" opacity="0.35"/>
+        </svg>
+      </div>
+
+      <h1 class="brand">WhiteHat</h1>
+      <div class="subtitle">안전한 로그인</div>
+
+      <div class="form">
+        {% if error %}
+          <div class="error" role="alert">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" autocomplete="on">
+          <div class="field">
+            <div class="label">아이디</div>
+            <div class="control">
+              <input class="input" type="text" name="username" placeholder="아이디를 입력하세요" required autofocus />
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="label">비밀번호</div>
+            <div class="control">
+              <input id="pw" class="input" type="password" name="password" placeholder="비밀번호를 입력하세요" required />
+              <button class="toggle" type="button" aria-label="비밀번호 보기" onclick="togglePw()">
+                <svg id="eye" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn">로그인</button>
+        </form>
+
+        <div class="test">
+          테스트 계정: customer1 / password123, storeowner1 / password123
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      WhiteHat은 안전한 인증 시스템을 제공합니다.<br/>
+      로그인 정보는 암호화되어 전송됩니다.
+    </div>
+  </div>
+
+  <script>
+    function togglePw(){
+      var pw = document.getElementById('pw');
+      if(!pw) return;
+      pw.type = (pw.type === 'password') ? 'text' : 'password';
+    }
+  </script>
 </body>
 </html>
 '''
