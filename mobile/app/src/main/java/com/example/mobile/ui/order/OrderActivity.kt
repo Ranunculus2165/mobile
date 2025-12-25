@@ -189,7 +189,8 @@ class OrderActivity : BaseActivity() {
                 btnPay.setBackgroundColor(android.graphics.Color.parseColor("#CCCCCC"))
             } else {
                 btnPay.isEnabled = true
-                btnPay.setBackgroundColor(android.graphics.Color.parseColor("#20B2AA"))
+                // XML의 라운드 스타일 유지
+                btnPay.setBackgroundResource(R.drawable.bg_teal_rounded_14)
             }
         }
     }
