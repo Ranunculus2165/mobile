@@ -1,6 +1,7 @@
 package com.example.mobile.ui.supportticket
 
 import android.content.Intent
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -64,18 +65,18 @@ class SupportTicketAdapter : ListAdapter<SupportTicketResponse, SupportTicketAda
         when (item.status) {
             "ANSWERED" -> {
                 holder.tvStatus.text = "답변완료"
-                holder.tvStatus.setTextColor(0xFF4CAF50.toInt())
-                holder.tvStatus.setBackgroundColor(0xFFE8F5E9.toInt())
+                holder.tvStatus.setTextColor(Color.parseColor("#0F766E"))
+                holder.tvStatus.setBackgroundResource(R.drawable.bg_store_status_open)
             }
             "OPEN" -> {
                 holder.tvStatus.text = "답변대기"
-                holder.tvStatus.setTextColor(0xFFFF9800.toInt())
-                holder.tvStatus.setBackgroundColor(0xFFFFE0B2.toInt())
+                holder.tvStatus.setTextColor(Color.parseColor("#C2410C"))
+                holder.tvStatus.setBackgroundResource(R.drawable.bg_store_status_closed)
             }
             "CLOSED" -> {
                 holder.tvStatus.text = "답변완료"
-                holder.tvStatus.setTextColor(0xFF4CAF50.toInt())
-                holder.tvStatus.setBackgroundColor(0xFFE8F5E9.toInt())
+                holder.tvStatus.setTextColor(Color.parseColor("#0F766E"))
+                holder.tvStatus.setBackgroundResource(R.drawable.bg_store_status_open)
             }
             else -> {
                 holder.tvStatus.text = item.status

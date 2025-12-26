@@ -169,9 +169,10 @@
                             android:layout_height="wrap_content"
                             android:text="답변완료"
                             android:textSize="14sp"
-                            android:textColor="#4CAF50"
-                            android:background="#E8F5E9"
-                            android:paddingHorizontal="8dp"
+                            android:textStyle="bold"
+                            android:textColor="#0F766E"
+                            android:background="@drawable/bg_store_status_open"
+                            android:paddingHorizontal="10dp"
                             android:paddingVertical="4dp" />
                     </LinearLayout>
 
