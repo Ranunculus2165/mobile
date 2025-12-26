@@ -7,6 +7,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobile.R
 import com.example.mobile.data.model.Store
+import java.text.NumberFormat
+import java.util.Locale
 
 class StoreListAdapter(
     private val onStoreClick: (Store) -> Unit
@@ -39,20 +41,37 @@ class StoreListAdapter(
 
         private val tvName: TextView = itemView.findViewById(R.id.tvStoreName)
         private val tvStatus: TextView = itemView.findViewById(R.id.tvStoreStatus)
-        private val tvMinOrderAndTime: TextView = itemView.findViewById(R.id.tvStoreMinOrder)
+        private val tvEta: TextView = itemView.findViewById(R.id.tvStoreMinOrder)
+        private val tvDeliveryFee: TextView = itemView.findViewById(R.id.tvStoreDeliveryFee)
 
         fun bind(item: Store) {
             tvName.text = item.name
 
-            tvStatus.text = when (item.status) {
-                "OPEN" -> "영업 중"
-                "CLOSED" -> "영업 종료"
-                "PREPARING" -> "준비 중"
-                else -> "상태 알 수 없음"
+            // 영업 상태 배지
+            when (item.status) {
+                "OPEN" -> {
+                    tvStatus.text = "영업중"
+                    tvStatus.setTextColor(0xFF0F766E.toInt())
+                    tvStatus.setBackgroundResource(R.drawable.bg_store_status_open)
+                }
+                "PREPARING" -> {
+                    tvStatus.text = "준비중"
+                    tvStatus.setTextColor(0xFFF97316.toInt())
+                    tvStatus.setBackgroundResource(R.drawable.bg_store_status_closed)
+                }
+                else -> { // CLOSED 등
+                    tvStatus.text = "영업종료"
+                    tvStatus.setTextColor(0xFFF97316.toInt())
+                    tvStatus.setBackgroundResource(R.drawable.bg_store_status_closed)
+                }
             }
 
-            val minOrderText = String.format("최소주문 %,d원", item.minOrderPrice)
-            tvMinOrderAndTime.text = "약 30~40분"
+            // (CTF/데모) 배달 예상 시간은 더미로 표시
+            tvEta.text = "25-35분"
+
+            val nf = NumberFormat.getNumberInstance(Locale.KOREA)
+            val delivery = nf.format(item.deliveryTip)
+            tvDeliveryFee.text = if (item.deliveryTip <= 0) "배달비 무료" else "배달비 ${delivery}원"
 
             itemView.setOnClickListener {
                 onStoreClick(item)

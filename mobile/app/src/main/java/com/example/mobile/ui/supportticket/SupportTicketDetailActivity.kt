@@ -1,6 +1,9 @@
 package com.example.mobile.ui.supportticket
 
+import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageButton
 import android.widget.TextView
 import com.example.mobile.R
@@ -87,6 +90,14 @@ class SupportTicketDetailActivity : BaseActivity() {
         tvStoreName.text = ticket.storeName
         tvMessage.text = ticket.message
 
+        // 🚨(CTF) STEP2: Insecure Storage - 특정 가게 ID를 평문으로 SharedPreferences에 저장
+        // - 공격자가 /shared_prefs/support_prefs.xml 을 통해 storeId를 획득 가능
+        val prefs = getSharedPreferences("support_prefs", Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("target_store_id", ticket.storeId.toString()) // Plaintext
+            .apply()
+        Log.d("VULN_CHAIN", "STEP2(SupportDetail): target_store_id='${ticket.storeId}' 를 평문 저장 완료")
+
         // 날짜 포맷팅
         val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
         val dateFormatWithMillis = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault())
@@ -110,18 +121,18 @@ class SupportTicketDetailActivity : BaseActivity() {
         when (ticket.status) {
             "ANSWERED" -> {
                 tvStatus.text = "답변완료"
-                tvStatus.setTextColor(0xFF4CAF50.toInt())
-                tvStatus.setBackgroundColor(0xFFE8F5E9.toInt())
+                tvStatus.setTextColor(Color.parseColor("#0F766E"))
+                tvStatus.setBackgroundResource(R.drawable.bg_store_status_open)
             }
             "OPEN" -> {
                 tvStatus.text = "답변대기"
-                tvStatus.setTextColor(0xFFFF9800.toInt())
-                tvStatus.setBackgroundColor(0xFFFFE0B2.toInt())
+                tvStatus.setTextColor(Color.parseColor("#C2410C"))
+                tvStatus.setBackgroundResource(R.drawable.bg_store_status_closed)
             }
             "CLOSED" -> {
                 tvStatus.text = "답변완료"
-                tvStatus.setTextColor(0xFF4CAF50.toInt())
-                tvStatus.setBackgroundColor(0xFFE8F5E9.toInt())
+                tvStatus.setTextColor(Color.parseColor("#0F766E"))
+                tvStatus.setBackgroundResource(R.drawable.bg_store_status_open)
             }
             else -> {
                 tvStatus.text = ticket.status

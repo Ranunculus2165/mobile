@@ -74,7 +74,6 @@ class MenuAdapter(
                     // 장바구니는 보호된 기능이므로, 비로그인 상태면 401을 맞기 전에 로그인으로 유도
                     if (!isLoggedIn()) {
                         withContext(Dispatchers.Main) {
-                            Toast.makeText(itemView.context, "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
                             itemView.context.startActivity(
                                 android.content.Intent(itemView.context, LoginActivity::class.java)
                             )
@@ -96,11 +95,6 @@ class MenuAdapter(
                     
                     // 메인 스레드에서 Toast 표시 및 콜백 호출
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(
-                            itemView.context,
-                            "장바구니에 추가되었습니다",
-                            Toast.LENGTH_SHORT
-                        ).show()
                         // 장바구니 업데이트 콜백 호출
                         onCartUpdated?.invoke()
                     }

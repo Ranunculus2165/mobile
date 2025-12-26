@@ -14,6 +14,7 @@ import com.example.mobile.R
 import com.example.mobile.data.model.CartResponse
 import com.example.mobile.data.network.ApiClient
 import com.example.mobile.ui.base.BaseActivity
+import com.example.mobile.ui.mypage.MyPageActivity
 import com.example.mobile.ui.storelist.StoreListActivity
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
@@ -188,7 +189,8 @@ class OrderActivity : BaseActivity() {
                 btnPay.setBackgroundColor(android.graphics.Color.parseColor("#CCCCCC"))
             } else {
                 btnPay.isEnabled = true
-                btnPay.setBackgroundColor(android.graphics.Color.parseColor("#20B2AA"))
+                // XML의 라운드 스타일 유지
+                btnPay.setBackgroundResource(R.drawable.bg_teal_rounded_14)
             }
         }
     }
@@ -206,15 +208,8 @@ class OrderActivity : BaseActivity() {
 
                     val response = ApiClient.orderApi.createOrder(request)
 
-                    // 주문 성공
-                    Toast.makeText(
-                        this@OrderActivity,
-                        "주문이 완료되었습니다!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                    // 주문 완료 후 홈 화면으로 이동
-                    val intent = Intent(this@OrderActivity, StoreListActivity::class.java)
+                    // 주문 완료 후 마이페이지로 이동
+                    val intent = Intent(this@OrderActivity, MyPageActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
                     startActivity(intent)
                     finish()
