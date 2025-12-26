@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="#FFFFFF">
 
     <!-- 상단 바 -->
     <LinearLayout
@@ -41,12 +41,22 @@
             android:paddingStart="8dp" />
     </LinearLayout>
 
+    <!-- 구분선 -->
+    <View
+        android:id="@+id/dividerTop"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#E0E0E0"
+        app:layout_constraintTop_toBottomOf="@id/llTopBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- 스크롤 가능한 내용 -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintTop_toBottomOf="@id/llTopBar"
+        app:layout_constraintTop_toBottomOf="@id/dividerTop"
         app:layout_constraintBottom_toTopOf="@id/btnSubmit"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -55,7 +65,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:padding="16dp">
 
             <!-- 가게 선택 -->
             <TextView
@@ -64,14 +74,16 @@
                 android:text="가게 선택"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:textColor="#111827"
                 android:layout_marginBottom="8dp" />
 
             <Spinner
                 android:id="@+id/spinnerStore"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="12dp"
-                android:background="@android:drawable/dialog_holo_light_frame"
+                android:layout_height="52dp"
+                android:background="@drawable/bg_input_field"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="14dp"
                 android:layout_marginBottom="24dp" />
 
             <!-- 제목 -->
@@ -81,15 +93,19 @@
                 android:text="제목"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:textColor="#111827"
                 android:layout_marginBottom="8dp" />
 
             <EditText
                 android:id="@+id/etTitle"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 android:hint="제목을 입력하세요"
-                android:padding="12dp"
-                android:background="@android:drawable/dialog_holo_light_frame"
+                android:textColor="#111827"
+                android:textColorHint="#94A3B8"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="14dp"
+                android:background="@drawable/bg_input_field"
                 android:inputType="text"
                 android:maxLines="1"
                 android:layout_marginBottom="24dp" />
@@ -101,17 +117,21 @@
                 android:text="내용"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:textColor="#111827"
                 android:layout_marginBottom="8dp" />
 
             <EditText
                 android:id="@+id/etMessage"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="180dp"
                 android:hint="문의 내용을 입력하세요"
-                android:padding="12dp"
-                android:background="@android:drawable/dialog_holo_light_frame"
+                android:textColor="#111827"
+                android:textColorHint="#94A3B8"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="14dp"
+                android:background="@drawable/bg_input_field"
                 android:inputType="textMultiLine"
-                android:minLines="5"
+                android:minLines="6"
                 android:gravity="top|start"
                 android:scrollbars="vertical" />
 
@@ -122,11 +142,11 @@
     <Button
         android:id="@+id/btnSubmit"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:text="문의 등록"
         android:textColor="#FFFFFF"
-        android:backgroundTint="#03DAC5"
-        android:padding="16dp"
+        android:background="@drawable/bg_teal_rounded_14"
+        android:padding="12dp"
         android:layout_margin="16dp"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
