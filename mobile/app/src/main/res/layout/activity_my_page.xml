@@ -13,6 +13,7 @@
         android:text="마이페이지"
         android:textSize="22sp"
         android:textStyle="bold"
+        android:textColor="#111827"
         android:padding="16dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -44,7 +45,7 @@
                 android:text="김민수"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="#000000" />
+                android:textColor="#111827" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -57,7 +58,7 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:src="@android:drawable/ic_menu_call"
-                    android:tint="#666666" />
+                    android:tint="#64748B" />
 
                 <TextView
                     android:id="@+id/tvUserPhone"
@@ -65,7 +66,7 @@
                     android:layout_height="wrap_content"
                     android:text="010-1234-5678"
                     android:textSize="14sp"
-                    android:textColor="#666666"
+                    android:textColor="#64748B"
                     android:layout_marginStart="8dp" />
             </LinearLayout>
         </LinearLayout>
@@ -87,14 +88,14 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:src="@android:drawable/ic_menu_recent_history"
-                    android:tint="#666666" />
+                    android:tint="#64748B" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="포인트"
                     android:textSize="14sp"
-                    android:textColor="#666666"
+                    android:textColor="#64748B"
                     android:layout_marginStart="4dp" />
             </LinearLayout>
 
@@ -105,7 +106,7 @@
                 android:text="12,500P"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="#4CAF50"
+                android:textColor="#20B2AA"
                 android:layout_marginTop="4dp" />
         </LinearLayout>
     </LinearLayout>
@@ -128,6 +129,7 @@
         android:text="주문 내역"
         android:textSize="18sp"
         android:textStyle="bold"
+        android:textColor="#111827"
         android:padding="16dp"
         app:layout_constraintTop_toBottomOf="@id/divider1"
         app:layout_constraintStart_toStartOf="parent"
@@ -137,7 +139,6 @@
         android:id="@+id/rvOrderHistory"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:padding="8dp"
         android:clipToPadding="false"
         app:layout_constraintTop_toBottomOf="@id/tvOrderHistoryTitle"
         app:layout_constraintBottom_toTopOf="@id/llBottomButtons"
@@ -151,6 +152,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
+        android:background="#FFFFFF"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -158,31 +160,30 @@
         <Button
             android:id="@+id/btnViewAllOrders"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="52dp"
             android:text="전체 주문 내역 보기"
-            android:textColor="#000000"
-            android:backgroundTint="#FFFFFF"
-            android:background="@android:drawable/dialog_holo_light_frame"
+            android:textColor="#111827"
+            android:background="@drawable/bg_qty_control"
             android:layout_marginBottom="12dp"
             android:padding="12dp" />
 
         <Button
             android:id="@+id/btnInquiry"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:text="1대1 문의하기"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#03DAC5"
+            android:background="@drawable/bg_teal_rounded_14"
             android:padding="12dp"
             android:layout_marginBottom="12dp" />
 
         <Button
             android:id="@+id/btnLogout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="52dp"
             android:text="로그아웃"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#FF5722"
+            android:background="@drawable/bg_orange_rounded_14"
             android:padding="12dp" />
     </LinearLayout>
 

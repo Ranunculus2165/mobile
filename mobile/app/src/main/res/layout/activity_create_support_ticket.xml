@@ -32,14 +32,13 @@
 
         <TextView
             android:id="@+id/tvTitle"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="문의 작성"
+            android:text="1대1 문의"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="#111827"
-            android:layout_weight="1"
-            android:gravity="center" />
+            android:paddingStart="8dp" />
     </LinearLayout>
 
     <!-- 스크롤 가능한 내용 -->
