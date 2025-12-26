@@ -54,6 +54,17 @@ public class StoreService {
         return new StoreDetailResponse(storeDto, menus);
     }
 
+    /** 가게 상태 변경 (영업 중 / 준비 중) */
+    public Store updateStoreStatus(Long storeId, Boolean isOpen) {
+        StoreEntity entity = storeRepository.findById(storeId)
+                .orElseThrow(() -> new IllegalArgumentException("Store Not Found: " + storeId));
+
+        entity.setIsOpen(isOpen);
+        storeRepository.save(entity);
+
+        return toStoreDto(entity);
+    }
+
     /** Store Entity → DTO 변환 */
     private Store toStoreDto(StoreEntity e) {
         Store dto = new Store();

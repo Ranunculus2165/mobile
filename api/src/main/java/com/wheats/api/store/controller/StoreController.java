@@ -4,6 +4,7 @@ import com.wheats.api.store.dto.MenuItem;
 import com.wheats.api.store.dto.Store;
 import com.wheats.api.store.dto.StoreDetailResponse;
 import com.wheats.api.store.dto.StoreStatus;
+import com.wheats.api.store.dto.StoreStatusRequest;
 import com.wheats.api.store.service.StoreService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +60,22 @@ public class StoreController {
                 menus = Collections.emptyList();
             }
             return ResponseEntity.ok(menus);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    // =============================
+    //  가게 상태 변경
+    //  PUT /api/stores/{storeId}/status
+    // =============================
+    @PutMapping("/{storeId}/status")
+    public ResponseEntity<Store> updateStoreStatus(
+            @PathVariable Long storeId,
+            @RequestBody StoreStatusRequest request) {
+        try {
+            Store updatedStore = storeService.updateStoreStatus(storeId, request.getIsOpen());
+            return ResponseEntity.ok(updatedStore);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }

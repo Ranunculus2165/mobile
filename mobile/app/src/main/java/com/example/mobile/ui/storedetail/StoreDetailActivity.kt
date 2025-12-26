@@ -102,6 +102,8 @@ class StoreDetailActivity : BaseActivity() {
         super.onResume()
         // 화면이 다시 보일 때 장바구니 상태 업데이트
         updateCartBadge()
+        // 🔥 화면이 다시 보일 때 가게 상세 정보(상태 포함) 갱신
+        loadStoreDetail(storeId)
     }
 
     private fun updateCartBadge() {

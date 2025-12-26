@@ -7,7 +7,7 @@ spring:
       indent-output: true
 
   datasource:
-    url: jdbc:mysql://db:3306/wheats?serverTimezone=Asia/Seoul&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/wheats?serverTimezone=Asia/Seoul&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true
     username: wheats
     password: wheats
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -23,7 +23,7 @@ spring:
 # OAuth 서버 설정
 oauth:
   server:
-    url: http://oauth-server:3000  # Docker 내부에서는 서비스 이름 사용
+    url: http://localhost:3000  # 로컬 개발 시에는 localhost 사용
 
 logging:
   level:
