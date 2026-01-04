@@ -87,8 +87,9 @@ public class StoreController {
         resp.setTodaySalesTotal(350000);
         resp.setTodayOrderCount(42);
 
-        if (ownerId.equals(4242L)) {
-            resp.setDeeplinkFragment("th/wheat");
+        // 🚨 CTF: ownerId=5 (카페소풍)일 때 URL path 노출
+        if (ownerId.equals(5L)) {
+            resp.setDeeplinkFragment("/dashboard");  // 🔑 URL 두번째 부분
         }
 
         return ResponseEntity.ok(resp);

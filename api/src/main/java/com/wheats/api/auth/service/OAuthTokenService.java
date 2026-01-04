@@ -34,6 +34,22 @@ public class OAuthTokenService {
     }
 
     /**
+     * OAuth 토큰 검증 결과를 담는 클래스 (사용자 정보 + scope)
+     */
+    public static class OAuthValidationResult {
+        private final UserEntity user;
+        private final String scope;
+
+        public OAuthValidationResult(UserEntity user, String scope) {
+            this.user = user;
+            this.scope = scope;
+        }
+
+        public UserEntity getUser() { return user; }
+        public String getScope() { return scope; }
+    }
+
+    /**
      * OAuth Access Token을 검증하고 사용자 정보를 가져옴
      * 
      * 처리 과정:
@@ -135,6 +151,58 @@ public class OAuthTokenService {
                 System.err.println("   ⚠️ OAuth 서버 호스트를 찾을 수 없습니다: " + oauthServerUrl);
             }
             
+            e.printStackTrace();
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * OAuth Access Token을 검증하고 사용자 정보 + scope를 함께 가져옴
+     *
+     * @param accessToken OAuth Access Token (Bearer 접두사 없이 전달됨)
+     * @return OAuthValidationResult (사용자 정보 + scope)
+     */
+    public Optional<OAuthValidationResult> validateTokenWithScope(String accessToken) {
+        String tokenPreview = accessToken != null && accessToken.length() > 15
+            ? accessToken.substring(0, 10) + "..." + accessToken.substring(accessToken.length() - 5)
+            : (accessToken != null ? accessToken : "null");
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            String bearerToken = accessToken;
+            if (accessToken != null && !accessToken.startsWith("Bearer ")) {
+                bearerToken = "Bearer " + accessToken;
+            }
+            headers.set("Authorization", bearerToken);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            String url = oauthServerUrl + "/api/me";
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    String.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                JsonNode jsonNode = objectMapper.readTree(response.getBody());
+                String email = jsonNode.get("email").asText();
+                String scope = jsonNode.has("scope") ? jsonNode.get("scope").asText() : "";
+
+                Optional<UserEntity> userOpt = userRepository.findByEmail(email);
+
+                if (userOpt.isPresent()) {
+                    System.out.println("✅ OAuth 토큰 검증 성공 (with scope): email=" + email + ", scope=" + scope);
+                    return Optional.of(new OAuthValidationResult(userOpt.get(), scope));
+                } else {
+                    System.out.println("⚠️ OAuth 토큰은 유효하지만 Wheats DB에 해당 사용자가 없음: email=" + email);
+                }
+            }
+
+            return Optional.empty();
+        } catch (Exception e) {
+            System.err.println("❌ OAuth token validation failed: " + e.getClass().getSimpleName());
+            System.err.println("   Token Preview: " + tokenPreview);
             e.printStackTrace();
             return Optional.empty();
         }

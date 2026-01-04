@@ -51,10 +51,12 @@ class OwnerDashboardActivity : AppCompatActivity() {
                     운영중인 점포 수: ${body.stores.size}개
                 """.trimIndent()
 
-                // 4) 특정 ownerId일 때만 DEBUG 정보 표시
+                // 🚨 CTF STEP3: 특정 ownerId일 때 URL path 노출 (플래그 두번째 부분)
                 if (body.deeplinkFragment != null) {
-                    tvDebug.text = "DEBUG : ${body.deeplinkFragment}"
+                    // 🔑 URL 두번째 부분 노출
+                    tvDebug.text = "관리 경로: ${body.deeplinkFragment}"
                     tvDebug.visibility = View.VISIBLE
+                    Log.d("VULN_CHAIN", "STEP3(Deeplink): deeplinkFragment='${body.deeplinkFragment}' 획득")
                 } else {
                     tvDebug.visibility = View.GONE
                 }

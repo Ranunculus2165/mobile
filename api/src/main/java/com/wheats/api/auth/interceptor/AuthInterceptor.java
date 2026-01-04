@@ -17,6 +17,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     private static final String USER_ID_ATTRIBUTE = "userId";
     private static final String USER_ROLE_ATTRIBUTE = "role";
     private static final String USER_ENTITY_ATTRIBUTE = "user";
+    private static final String USER_SCOPE_ATTRIBUTE = "scope";
 
     private final OAuthTokenService oauthTokenService;
 
@@ -28,7 +29,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // 1. Authorization 헤더에서 토큰 추출
         String authHeader = request.getHeader(AUTHORIZATION_HEADER);
-        
+
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json;charset=UTF-8");
@@ -39,28 +40,32 @@ public class AuthInterceptor implements HandlerInterceptor {
         // 2. Bearer 접두사 제거
         String token = authHeader.substring(BEARER_PREFIX.length());
 
-        // 3. OAuth 토큰 검증 및 사용자 정보 가져오기
-        //    - OAuth 서버의 /api/me를 호출하여 토큰 검증 및 이메일 추출
+        // 3. OAuth 토큰 검증 및 사용자 정보 + scope 가져오기
+        //    - OAuth 서버의 /api/me를 호출하여 토큰 검증, 이메일, scope 추출
         //    - 추출한 이메일로 Wheats DB의 User 테이블에서 사용자 조회
-        Optional<UserEntity> userOpt = oauthTokenService.validateTokenAndGetUser(token);
-        
-        if (userOpt.isEmpty()) {
+        Optional<OAuthTokenService.OAuthValidationResult> resultOpt = oauthTokenService.validateTokenWithScope(token);
+
+        if (resultOpt.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("{\"error\": \"유효하지 않은 토큰입니다.\"}");
             return false;
         }
 
-        UserEntity user = userOpt.get();
-        
+        OAuthTokenService.OAuthValidationResult result = resultOpt.get();
+        UserEntity user = result.getUser();
+        String scope = result.getScope();
+
         // 4. 사용자 정보를 Request Attribute에 저장
         //    - userId: 개별 속성으로 저장 (기존 호환성 유지)
         //    - role: 개별 속성으로 저장 (기존 호환성 유지)
-        //    - user: UserEntity 전체 객체 저장 (새로 추가)
+        //    - user: UserEntity 전체 객체 저장
+        //    - scope: OAuth 토큰의 scope 저장 (CTF용)
         request.setAttribute(USER_ID_ATTRIBUTE, user.getId());
         request.setAttribute(USER_ROLE_ATTRIBUTE, user.getRole().name());
         request.setAttribute(USER_ENTITY_ATTRIBUTE, user);
-        
+        request.setAttribute(USER_SCOPE_ATTRIBUTE, scope);
+
         return true;
     }
 }

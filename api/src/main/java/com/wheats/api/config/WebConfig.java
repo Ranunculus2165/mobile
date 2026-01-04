@@ -19,8 +19,10 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
-                        "/api/stores",            // 가게 목록은 공개
-                        "/api/stores/**"          // 가게 상세 정보도 공개
+                        "/api/stores",                  // 가게 목록은 공개
+                        "/api/stores/{storeId}",        // 가게 상세 정보도 공개
+                        "/api/stores/{storeId}/menus"   // 메뉴 정보도 공개
+                        // 주의: /api/stores/owners/** 는 인증 필요 (CTF)
                 );
     }
 }
