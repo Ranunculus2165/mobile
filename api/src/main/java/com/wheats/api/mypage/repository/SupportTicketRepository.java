@@ -9,4 +9,7 @@ public interface SupportTicketRepository extends JpaRepository<SupportTicketEnti
 
     // 내 문의 목록 (최신순)
     List<SupportTicketEntity> findByUserIdOrderByCreatedAtDesc(Long userId);
+
+    // 관리자용: 전체 문의 목록 (최신순)
+    List<SupportTicketEntity> findAllByOrderByCreatedAtDesc();
 }

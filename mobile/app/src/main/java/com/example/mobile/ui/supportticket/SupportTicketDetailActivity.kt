@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.ImageButton
 import android.widget.TextView
 import com.example.mobile.R
+import com.example.mobile.data.auth.AuthStateManager
 import com.example.mobile.data.model.SupportTicketResponse
 import com.example.mobile.data.network.ApiClient
 import com.example.mobile.ui.base.BaseActivity
@@ -90,13 +91,20 @@ class SupportTicketDetailActivity : BaseActivity() {
         tvStoreName.text = ticket.storeName
         tvMessage.text = ticket.message
 
-        // 🚨(CTF) STEP2: Insecure Storage - 특정 가게 ID를 평문으로 SharedPreferences에 저장
-        // - 공격자가 /shared_prefs/support_prefs.xml 을 통해 storeId를 획득 가능
-        val prefs = getSharedPreferences("support_prefs", Context.MODE_PRIVATE)
-        prefs.edit()
-            .putString("target_store_id", ticket.storeId.toString()) // Plaintext
-            .apply()
-        Log.d("VULN_CHAIN", "STEP2(SupportDetail): target_store_id='${ticket.storeId}' 를 평문 저장 완료")
+        // AuthStateManager에서 현재 사용자 scope 확인
+        val authStateManager = AuthStateManager.getInstance(this)
+        val currentScope = authStateManager.current.scope ?: ""
+
+        // 🚨(CTF) STEP2: Insecure Storage - admin scope일 때만 취약점 트리거
+        // - 공격자가 /shared_prefs/support_prefs.xml 을 통해 storeId와 flag_part1(base URL)을 획득 가능
+        if (currentScope.contains("admin")) {
+            val prefs = getSharedPreferences("support_prefs", Context.MODE_PRIVATE)
+            prefs.edit()
+                .putString("target_store_id", ticket.storeId.toString()) // storeId (Deeplink에 사용)
+                .putString("flag_part1", "http://store.wheats.com") // 🔑 URL 첫번째 부분
+                .apply()
+            Log.d("VULN_CHAIN", "STEP2(SupportDetail): admin scope로 target_store_id='${ticket.storeId}', flag_part1 저장 완료")
+        }
 
         // 날짜 포맷팅
         val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())

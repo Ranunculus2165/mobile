@@ -51,12 +51,48 @@ public class SupportTicketService {
         );
 
         SupportTicketEntity saved = supportTicketRepository.save(entity);
-        
+
         // 가게 정보 조회
         StoreEntity store = storeRepository.findById(saved.getStoreId())
                 .orElse(null);
         String storeName = (store != null) ? store.getName() : "(삭제된 가게)";
-        
+
         return SupportTicketResponse.from(saved, storeName);
+    }
+
+    /**
+     * 관리자용: 모든 문의 조회
+     */
+    @Transactional(readOnly = true)
+    public List<SupportTicketResponse> getAllTickets() {
+        List<SupportTicketEntity> tickets = supportTicketRepository.findAllByOrderByCreatedAtDesc();
+
+        List<SupportTicketResponse> responses = new ArrayList<>();
+        for (SupportTicketEntity ticket : tickets) {
+            StoreEntity store = storeRepository.findById(ticket.getStoreId())
+                    .orElse(null);
+            String storeName = (store != null) ? store.getName() : "(삭제된 가게)";
+            responses.add(SupportTicketResponse.from(ticket, storeName));
+        }
+        return responses;
+    }
+
+    /**
+     * 관리자용: 특정 문의 조회
+     */
+    @Transactional(readOnly = true)
+    public SupportTicketResponse getTicketById(Long ticketId) {
+        SupportTicketEntity ticket = supportTicketRepository.findById(ticketId)
+                .orElse(null);
+
+        if (ticket == null) {
+            return null;
+        }
+
+        StoreEntity store = storeRepository.findById(ticket.getStoreId())
+                .orElse(null);
+        String storeName = (store != null) ? store.getName() : "(삭제된 가게)";
+
+        return SupportTicketResponse.from(ticket, storeName);
     }
 }
